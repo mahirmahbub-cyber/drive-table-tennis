@@ -38,11 +38,19 @@ describe('replayHistory', () => {
     expect(result.replayed[2].eloABefore).toBe(result.replayed[1].eloAAfter)
   })
 
-  it('deletion equivalence: replay without match X equals "match X never happened"', () => {
-    const all = [m('p1', 'p2', 'A'), m('p1', 'p2', 'A'), m('p2', 'p1', 'A')]
-    const without = [all[0], all[2]]
-    const a = replayHistory(without, ['p1', 'p2'])
-    const b = replayHistory(without, ['p1', 'p2'])
-    expect(a.currentElo.get('p1')).toBe(b.currentElo.get('p1'))
+  it('deletion equivalence: removing a middle match preserves earlier match ELOs and changes the final', () => {
+    const A = m('p1', 'p2', 'A')
+    const B = m('p1', 'p2', 'B')
+    const C = m('p1', 'p2', 'A')
+
+    const all = replayHistory([A, B, C], ['p1', 'p2'])
+    const withoutB = replayHistory([A, C], ['p1', 'p2'])
+
+    // Match A is first in both replays — its before/after ELOs must match.
+    expect(withoutB.replayed[0].eloAAfter).toBe(all.replayed[0].eloAAfter)
+    expect(withoutB.replayed[0].eloBAfter).toBe(all.replayed[0].eloBAfter)
+
+    // Removing B should change the final ELO (proving B was contributing).
+    expect(withoutB.currentElo.get('p1')).not.toBe(all.currentElo.get('p1'))
   })
 })
