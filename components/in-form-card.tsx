@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { db, matches, players } from '@/lib/db'
-import { eq, gte, and } from 'drizzle-orm'
+import { eq, gte } from 'drizzle-orm'
 import {
   computeFormScore,
   computeAboveExpectationScore,
@@ -73,44 +73,49 @@ export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">
+      <div className="section-header font-display">
         In Form{' '}
-        <span className="text-sm font-normal text-zinc-500">
-          (last {windowDays} days)
+        <span className="normal-case tracking-normal font-sans font-normal text-muted-foreground/70 ml-1">
+          {windowDays}d
         </span>
-      </h2>
-      <ol className="divide-y rounded border">
+      </div>
+      <ol>
         {topByDelta.map((r) => (
-          <li
-            key={r.player.id}
-            className="flex items-center gap-3 px-3 py-2"
-          >
+          <li key={r.player.id} className="data-row">
             <PlayerAvatar
               name={r.player.name}
               photoUrl={r.player.photoUrl}
-              size={28}
+              size={26}
             />
             <Link
               href={`/players/${r.player.id}`}
-              className="flex-1 hover:underline"
+              className="flex-1 min-w-0 text-sm font-medium hover:text-gain transition-colors duration-150 truncate"
             >
               {r.player.name}
             </Link>
-            <span className="font-mono text-sm tabular-nums text-zinc-500">
-              {r.w}-{r.l}
+
+            {/* W-L record */}
+            <span className="font-mono nums text-xs text-muted-foreground shrink-0">
+              {r.w}W {r.l}L
             </span>
+
+            {/* ΔELO — accent only for positive */}
             <span
-              className={`w-12 text-right font-mono tabular-nums ${
-                r.delta >= 0 ? 'text-emerald-600' : 'text-red-600'
+              className={`w-14 text-right font-display text-sm nums font-semibold shrink-0 ${
+                r.delta > 0
+                  ? 'text-gain'
+                  : r.delta < 0
+                  ? 'text-loss'
+                  : 'text-muted-foreground'
               }`}
             >
-              {r.delta >= 0 ? '+' : ''}
+              {r.delta > 0 ? '+' : ''}
               {r.delta}
             </span>
           </li>
         ))}
         {topByDelta.length === 0 && (
-          <li className="px-3 py-2 text-sm text-zinc-500">
+          <li className="px-3 py-3 text-sm text-muted-foreground">
             Nobody has played 3+ matches in the last {windowDays} days yet.
           </li>
         )}

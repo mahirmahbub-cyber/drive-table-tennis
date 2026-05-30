@@ -25,15 +25,23 @@ export function PlayerAvatar({
         alt={name}
         width={size}
         height={size}
-        className="rounded-full object-cover"
+        className="rounded-full object-cover ring-1 ring-border shrink-0"
         style={{ width: size, height: size }}
       />
     )
   }
+
+  // Monogram fallback — dark bg, gain-coloured text for visual pop
   return (
     <div
-      className="flex items-center justify-center rounded-full bg-zinc-800 font-medium text-zinc-100"
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
+      className="flex items-center justify-center rounded-full bg-secondary ring-1 ring-border font-display font-semibold text-gain shrink-0 select-none"
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.round(size * 0.38),
+        letterSpacing: '-0.02em',
+      }}
+      aria-label={name}
     >
       {initials(name)}
     </div>

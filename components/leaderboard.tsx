@@ -13,21 +13,55 @@ export async function Leaderboard() {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Leaderboard</h2>
-      <ol className="divide-y rounded border">
+      <div className="section-header font-display">Ladder</div>
+      <ol>
         {rows.map((p, i) => (
-          <li key={p.id} className="flex items-center gap-3 px-3 py-2">
-            <span className="w-6 text-right font-mono text-sm tabular-nums text-zinc-500">
+          <li key={p.id} className="data-row group">
+            {/* Rank */}
+            <span className="w-6 shrink-0 text-right font-mono nums text-xs text-muted-foreground">
               {i + 1}
             </span>
+
+            {/* Medal accent for top 3 */}
+            <span
+              className={`w-1 h-5 rounded-full shrink-0 ${
+                i === 0
+                  ? 'bg-gain'
+                  : i === 1
+                  ? 'bg-muted-foreground/60'
+                  : i === 2
+                  ? 'bg-muted-foreground/30'
+                  : 'bg-transparent'
+              }`}
+            />
+
             <PlayerAvatar name={p.name} photoUrl={p.photoUrl} size={28} />
-            <Link href={`/players/${p.id}`} className="flex-1 hover:underline">
-              {p.name}
-              {p.nickname && <span className="ml-2 text-sm text-zinc-500">&quot;{p.nickname}&quot;</span>}
+
+            <Link
+              href={`/players/${p.id}`}
+              className="flex-1 min-w-0 leading-tight hover:text-gain transition-colors duration-150"
+            >
+              <span className="block truncate text-sm font-medium">
+                {p.name}
+              </span>
+              {p.nickname && (
+                <span className="block truncate text-xs text-muted-foreground">
+                  &ldquo;{p.nickname}&rdquo;
+                </span>
+              )}
             </Link>
-            <span className="font-mono tabular-nums">{p.currentElo}</span>
+
+            {/* ELO — the star number */}
+            <span className="font-display text-base nums font-semibold tabular-nums shrink-0">
+              {p.currentElo}
+            </span>
           </li>
         ))}
+        {rows.length === 0 && (
+          <li className="px-3 py-4 text-sm text-muted-foreground">
+            No players yet.
+          </li>
+        )}
       </ol>
     </section>
   )

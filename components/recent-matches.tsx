@@ -26,25 +26,58 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Recent matches</h2>
-      <ul className="divide-y rounded border">
+      <div className="section-header font-display">Recent</div>
+      <ul>
         {rows.map((r) => {
           const aWon = r.winnerId === r.aId
           const sets = (r.setScores as Array<[number, number]>) ?? []
           return (
-            <li key={r.id} className="px-3 py-2 text-sm">
-              <Link href={`/players/${r.aId}`} className={aWon ? 'font-semibold' : ''}>
+            <li key={r.id} className="data-row text-sm">
+              {/* Winner indicator */}
+              <span
+                className={`w-1 h-4 rounded-full shrink-0 ${aWon ? 'bg-gain' : 'bg-transparent'}`}
+              />
+              <Link
+                href={`/players/${r.aId}`}
+                className={`shrink-0 transition-colors duration-150 ${
+                  aWon
+                    ? 'font-semibold text-foreground hover:text-gain'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
                 {r.aName}
               </Link>
-              <span className="mx-2 font-mono tabular-nums text-zinc-500">
-                {sets.map(([sa, sb]) => `${sa}-${sb}`).join(' ')}
-              </span>
-              <Link href={`/players/${r.bId}`} className={!aWon ? 'font-semibold' : ''}>
+
+              {/* Scores */}
+              {sets.length > 0 ? (
+                <span className="flex-1 text-center font-mono nums text-xs text-muted-foreground tracking-tight">
+                  {sets.map(([sa, sb]) => `${sa}–${sb}`).join('  ')}
+                </span>
+              ) : (
+                <span className="flex-1" />
+              )}
+
+              <Link
+                href={`/players/${r.bId}`}
+                className={`shrink-0 transition-colors duration-150 ${
+                  !aWon
+                    ? 'font-semibold text-foreground hover:text-gain'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
                 {r.bName}
               </Link>
+              <span
+                className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-gain' : 'bg-transparent'}`}
+              />
             </li>
           )
         })}
+        {rows.length === 0 && (
+          <li className="px-3 py-3 text-sm text-muted-foreground">
+            No matches yet.
+          </li>
+        )}
       </ul>
     </section>
   )

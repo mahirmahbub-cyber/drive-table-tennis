@@ -3,13 +3,39 @@ import { logout } from '@/app/actions/auth'
 
 export function AdminNav() {
   return (
-    <nav className="flex items-center gap-6 border-b px-6 py-3 text-sm">
-      <Link href="/admin" className="font-semibold">Admin</Link>
-      <Link href="/admin/players">Players</Link>
-      <Link href="/admin/matches/new">Log match</Link>
-      <Link href="/admin/tournaments/new">New tournament</Link>
+    <nav className="flex items-center gap-0 border-b border-border bg-card text-sm">
+      {/* Brand mark */}
+      <Link
+        href="/admin"
+        className="font-display uppercase tracking-widest text-xs font-semibold px-4 py-3 border-r border-border hover:text-gain transition-colors duration-150"
+      >
+        Admin
+      </Link>
+
+      <Link
+        href="/admin/players"
+        className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors duration-150"
+      >
+        Players
+      </Link>
+      <Link
+        href="/admin/matches/new"
+        className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors duration-150"
+      >
+        Log match
+      </Link>
+      <Link
+        href="/admin/tournaments/new"
+        className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors duration-150"
+      >
+        Tournament
+      </Link>
+
       <form action={logout} className="ml-auto">
-        <button type="submit" className="text-zinc-500 hover:text-zinc-900">
+        <button
+          type="submit"
+          className="px-4 py-3 text-muted-foreground hover:text-foreground transition-colors duration-150"
+        >
           Sign out
         </button>
       </form>

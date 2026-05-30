@@ -4,6 +4,7 @@ import { and, asc, eq, isNotNull, or } from 'drizzle-orm'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
 import { classifyOpponentTier } from '@/lib/stats'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,18 +28,12 @@ export default async function PlayerPage({
     )
     .orderBy(asc(matches.playedAt))
 
-  // ELO chart points
   const points = playerMatches.map((m, i) => {
     const isA = m.playerAId === id
     const elo = isA ? m.eloAAfter! : m.eloBAfter!
-    return {
-      t: m.playedAt!.getTime(),
-      elo,
-      label: `#${i + 1}`,
-    }
+    return { t: m.playedAt!.getTime(), elo, label: `#${i + 1}` }
   })
 
-  // W/L overall + by tier
   let wins = 0
   let losses = 0
   const tier = {
@@ -58,53 +53,109 @@ export default async function PlayerPage({
     else tier[t].l++
   }
 
+  const winPct =
+    wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : null
+
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <header className="mb-6 flex items-center gap-4">
-        <PlayerAvatar name={player.name} photoUrl={player.photoUrl} size={64} />
-        <div>
-          <h1 className="text-2xl font-semibold">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
+
+      {/* ── Back link ── */}
+      <Link
+        href="/"
+        className="inline-block mb-6 text-xs font-display uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors duration-150"
+      >
+        ← Ladder
+      </Link>
+
+      {/* ── Player header ── */}
+      <header className="mb-8 flex items-center gap-5 border-b border-border pb-6">
+        <PlayerAvatar name={player.name} photoUrl={player.photoUrl} size={72} />
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl md:text-3xl font-semibold tracking-tight leading-tight">
             {player.name}
             {player.nickname && (
-              <span className="ml-2 text-base font-normal text-zinc-500">
-                &quot;{player.nickname}&quot;
+              <span className="ml-2 text-lg font-normal text-muted-foreground">
+                &ldquo;{player.nickname}&rdquo;
               </span>
             )}
           </h1>
-          {player.bio && <p className="text-sm text-zinc-500">{player.bio}</p>}
-          <p className="mt-1 font-mono tabular-nums">
-            ELO {player.currentElo} · {wins}W – {losses}L
-          </p>
+          {player.bio && (
+            <p className="mt-1 text-sm text-muted-foreground">{player.bio}</p>
+          )}
+
+          {/* Key stats row */}
+          <div className="mt-3 flex items-baseline gap-4 flex-wrap">
+            <div>
+              <span className="font-display text-2xl font-semibold nums text-foreground">
+                {player.currentElo}
+              </span>
+              <span className="ml-1.5 text-xs text-muted-foreground uppercase tracking-widest font-display">
+                ELO
+              </span>
+            </div>
+            <div className="text-muted-foreground text-sm">
+              <span className="font-mono nums text-foreground">{wins}</span>W
+              {' '}
+              <span className="font-mono nums text-foreground">{losses}</span>L
+              {winPct !== null && (
+                <span className="ml-2 text-gain font-mono nums font-medium">
+                  {winPct}%
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 
+      {/* ── ELO chart ── */}
       <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">ELO over time</h2>
+        <div className="section-header font-display">ELO Trajectory</div>
         <EloChart data={points} />
       </section>
 
-      <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">By opponent capability</h2>
+      {/* ── Tier breakdown ── */}
+      <section>
+        <div className="section-header font-display">By Opponent Tier</div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-zinc-500">
-              <th className="pb-1">Tier</th>
-              <th className="pb-1">Wins</th>
-              <th className="pb-1">Losses</th>
-              <th className="pb-1">Win %</th>
+            <tr>
+              <th className="pb-2 text-left font-display uppercase text-xs tracking-widest text-muted-foreground font-medium">
+                Tier
+              </th>
+              <th className="pb-2 text-right font-display uppercase text-xs tracking-widest text-muted-foreground font-medium">
+                W
+              </th>
+              <th className="pb-2 text-right font-display uppercase text-xs tracking-widest text-muted-foreground font-medium">
+                L
+              </th>
+              <th className="pb-2 text-right font-display uppercase text-xs tracking-widest text-muted-foreground font-medium">
+                Win%
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {(['higher', 'similar', 'lower'] as const).map((t) => {
               const { w, l } = tier[t]
               const total = w + l
               const pct = total === 0 ? '—' : `${Math.round((w / total) * 100)}%`
               return (
-                <tr key={t} className="border-t">
-                  <td className="py-1 capitalize">{t}-rated opponents</td>
-                  <td className="py-1 font-mono tabular-nums">{w}</td>
-                  <td className="py-1 font-mono tabular-nums">{l}</td>
-                  <td className="py-1 font-mono tabular-nums">{pct}</td>
+                <tr key={t}>
+                  <td className="py-1.5 capitalize text-muted-foreground">
+                    {t}-rated
+                  </td>
+                  <td className="py-1.5 text-right font-mono nums">{w}</td>
+                  <td className="py-1.5 text-right font-mono nums">{l}</td>
+                  <td
+                    className={`py-1.5 text-right font-mono nums font-medium ${
+                      total > 0 && w / total >= 0.5
+                        ? 'text-gain'
+                        : total > 0
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {pct}
+                  </td>
                 </tr>
               )
             })}
