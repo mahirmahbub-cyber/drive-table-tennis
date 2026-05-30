@@ -72,3 +72,90 @@ export async function logMatch(formData: FormData) {
   revalidatePath(`/players/${b.id}`)
   redirect('/')
 }
+
+async function replayAllAndWrite(): Promise<void> {
+  const allMatches = await db
+    .select()
+    .from(matches)
+    .orderBy(asc(matches.playedAt), asc(matches.createdAt))
+  const allPlayers = await db.select({ id: players.id }).from(players)
+
+  const history: HistoryMatch[] = allMatches
+    .filter((m) => m.playerAId && m.playerBId && m.winnerId && m.playedAt)
+    .map((m) => ({
+      id: m.id,
+      playerAId: m.playerAId!,
+      playerBId: m.playerBId!,
+      winner: m.winnerId === m.playerAId ? 'A' : 'B',
+    }))
+
+  const result = replayHistory(
+    history,
+    allPlayers.map((p) => p.id)
+  )
+
+  await db.transaction(async (tx) => {
+    for (const r of result.replayed) {
+      await tx
+        .update(matches)
+        .set({
+          eloABefore: r.eloABefore,
+          eloBBefore: r.eloBBefore,
+          eloAAfter: r.eloAAfter,
+          eloBAfter: r.eloBAfter,
+        })
+        .where(eq(matches.id, r.id))
+    }
+    for (const [playerId, elo] of result.currentElo.entries()) {
+      await tx.update(players).set({ currentElo: elo }).where(eq(players.id, playerId))
+    }
+  })
+}
+
+export async function editMatch(id: string, formData: FormData) {
+  const setsRaw: Array<[number, number]> = []
+  for (let i = 0; i < 7; i++) {
+    const a = formData.get(`set_${i}_a`)
+    const b = formData.get(`set_${i}_b`)
+    if (a == null || b == null || a === '' || b === '') continue
+    setsRaw.push([Number(a), Number(b)])
+  }
+  const parsed = matchLogSchema.safeParse({
+    playerAId: formData.get('playerAId'),
+    playerBId: formData.get('playerBId'),
+    sets: setsRaw,
+  })
+  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  const winner = inferWinner(parsed.data.sets)
+  if (!winner) return { error: 'Sets are tied' }
+
+  await db
+    .update(matches)
+    .set({
+      playerAId: parsed.data.playerAId,
+      playerBId: parsed.data.playerBId,
+      winnerId: winner === 'A' ? parsed.data.playerAId : parsed.data.playerBId,
+      setScores: parsed.data.sets,
+    })
+    .where(eq(matches.id, id))
+
+  await replayAllAndWrite()
+  revalidatePath('/')
+  revalidatePath('/matches')
+  revalidatePath('/players')
+  redirect('/matches')
+}
+
+export async function deleteMatch(id: string) {
+  await db.delete(matches).where(eq(matches.id, id))
+  await replayAllAndWrite()
+  revalidatePath('/')
+  revalidatePath('/matches')
+  revalidatePath('/players')
+}
+
+export async function rebuildElo() {
+  await replayAllAndWrite()
+  revalidatePath('/')
+  revalidatePath('/players')
+}
