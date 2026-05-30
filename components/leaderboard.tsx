@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { db, players } from '@/lib/db'
 import { desc, eq } from 'drizzle-orm'
 import { PlayerAvatar } from './player-avatar'
+import { AnimatedRow } from './motion/animated-row'
 
 export async function Leaderboard() {
   const rows = await db
@@ -16,7 +17,7 @@ export async function Leaderboard() {
       <div className="section-header font-display">Ladder</div>
       <ol>
         {rows.map((p, i) => (
-          <li key={p.id} className="data-row group">
+          <AnimatedRow key={p.id} layoutId={`leader-${p.id}`} className="data-row group">
             {/* Rank */}
             <span className="w-6 shrink-0 text-right font-mono nums text-xs text-muted-foreground">
               {i + 1}
@@ -55,7 +56,7 @@ export async function Leaderboard() {
             <span className="font-display text-base nums font-semibold tabular-nums shrink-0">
               {p.currentElo}
             </span>
-          </li>
+          </AnimatedRow>
         ))}
         {rows.length === 0 && (
           <li className="px-3 py-4 text-sm text-muted-foreground">
