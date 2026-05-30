@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Leaderboard } from '@/components/leaderboard'
 import { RecentMatches } from '@/components/recent-matches'
+import { InFormCard } from '@/components/in-form-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,10 @@ export default function HomePage() {
       </header>
       <div className="grid gap-8 md:grid-cols-2">
         <Leaderboard />
-        <RecentMatches />
+        <div className="space-y-8">
+          <InFormCard />
+          <RecentMatches />
+        </div>
       </div>
     </main>
   )
