@@ -3,6 +3,7 @@ import { db, matches, players } from '@/lib/db'
 import { and, asc, eq, isNotNull, or } from 'drizzle-orm'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
+import { SpeedoGauge } from '@/components/speedo-gauge'
 import { classifyOpponentTier } from '@/lib/stats'
 import Link from 'next/link'
 
@@ -68,42 +69,40 @@ export default async function PlayerPage({
       </Link>
 
       {/* ── Player header ── */}
-      <header className="mb-8 flex items-center gap-5 border-b border-border pb-6">
-        <PlayerAvatar name={player.name} photoUrl={player.photoUrl} size={72} />
-        <div className="min-w-0">
-          <h1 className="font-display text-2xl md:text-3xl font-semibold tracking-tight leading-tight">
-            {player.name}
-            {player.nickname && (
-              <span className="ml-2 text-lg font-normal text-muted-foreground">
-                &ldquo;{player.nickname}&rdquo;
-              </span>
+      <header className="mb-8 flex items-center justify-between gap-5 border-b border-border pb-6">
+        <div className="flex min-w-0 items-center gap-5">
+          <PlayerAvatar name={player.name} photoUrl={player.photoUrl} size={72} />
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl md:text-3xl font-semibold tracking-tight leading-tight">
+              {player.name}
+              {player.nickname && (
+                <span className="ml-2 text-lg font-normal text-muted-foreground">
+                  &ldquo;{player.nickname}&rdquo;
+                </span>
+              )}
+            </h1>
+            {player.bio && (
+              <p className="mt-1 text-sm text-muted-foreground">{player.bio}</p>
             )}
-          </h1>
-          {player.bio && (
-            <p className="mt-1 text-sm text-muted-foreground">{player.bio}</p>
-          )}
 
-          {/* Key stats row */}
-          <div className="mt-3 flex items-baseline gap-4 flex-wrap">
-            <div>
-              <span className="font-display text-2xl font-semibold nums text-foreground">
-                {player.currentElo}
+            {/* Key stats row */}
+            <div className="mt-3 flex items-baseline gap-4 flex-wrap text-muted-foreground text-sm">
+              <span>
+                <span className="font-mono nums text-foreground">{wins}</span>W{' '}
+                <span className="font-mono nums text-foreground">{losses}</span>L
               </span>
-              <span className="ml-1.5 text-xs text-muted-foreground uppercase tracking-widest font-display">
-                ELO
-              </span>
-            </div>
-            <div className="text-muted-foreground text-sm">
-              <span className="font-mono nums text-foreground">{wins}</span>W
-              {' '}
-              <span className="font-mono nums text-foreground">{losses}</span>L
               {winPct !== null && (
-                <span className="ml-2 text-gain font-mono nums font-medium">
-                  {winPct}%
+                <span className="font-display font-semibold nums text-gain">
+                  {winPct}% wins
                 </span>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Speedometer — the headline ELO read-out */}
+        <div className="hidden shrink-0 sm:block">
+          <SpeedoGauge elo={player.currentElo} label="ELO" size="lg" />
         </div>
       </header>
 

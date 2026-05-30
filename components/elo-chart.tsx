@@ -29,44 +29,45 @@ export function EloChart({ data }: { data: Point[] }) {
       <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
         <CartesianGrid
           strokeDasharray="1 4"
-          stroke="oklch(1 0 0 / 8%)"
+          stroke="#e3e3e5"
           vertical={false}
         />
         <ReferenceLine
           y={baseline}
-          stroke="oklch(1 0 0 / 12%)"
+          stroke="#cfcfcf"
           strokeDasharray="4 4"
         />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 10, fill: 'oklch(0.60 0.008 270)', fontFamily: 'var(--font-geist-mono)' }}
+          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           domain={['dataMin - 30', 'dataMax + 30']}
-          tick={{ fontSize: 10, fill: 'oklch(0.60 0.008 270)', fontFamily: 'var(--font-geist-mono)' }}
+          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip
           contentStyle={{
-            background: 'oklch(0.12 0.005 270)',
-            border: '1px solid oklch(1 0 0 / 9%)',
-            borderRadius: '2px',
+            background: '#ffffff',
+            border: '1px solid #e3e3e5',
+            borderRadius: '8px',
             fontSize: '12px',
-            fontFamily: 'var(--font-geist-mono)',
-            color: 'oklch(0.96 0.003 270)',
+            fontFamily: 'var(--font-ibm-plex-mono)',
+            color: '#161616',
           }}
-          cursor={{ stroke: 'oklch(1 0 0 / 15%)', strokeWidth: 1 }}
+          cursor={{ stroke: '#2960c5', strokeWidth: 1, strokeOpacity: 0.4 }}
         />
         <Line
           type="monotone"
           dataKey="elo"
-          stroke="oklch(0.82 0.22 131)"
-          strokeWidth={2}
+          stroke="#2960c5"
+          strokeWidth={2.5}
           dot={false}
-          activeDot={{ r: 3, fill: 'oklch(0.82 0.22 131)', strokeWidth: 0 }}
+          activeDot={{ r: 4, fill: '#2960c5', strokeWidth: 0 }}
+          isAnimationActive={false}
         />
       </LineChart>
     </ResponsiveContainer>

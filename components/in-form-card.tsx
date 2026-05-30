@@ -7,6 +7,7 @@ import {
   type ScoredMatch,
 } from '@/lib/stats'
 import { PlayerAvatar } from './player-avatar'
+import { DeltaCounter } from './motion/delta-counter'
 
 async function loadScoredMatches(since: Date): Promise<Map<string, ScoredMatch[]>> {
   const rows = await db
@@ -79,7 +80,7 @@ export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
           {windowDays}d
         </span>
       </div>
-      <ol>
+      <ol className="rounded-lg border border-border overflow-hidden bg-card">
         {topByDelta.map((r) => (
           <li key={r.player.id} className="data-row">
             <PlayerAvatar
@@ -89,7 +90,7 @@ export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
             />
             <Link
               href={`/players/${r.player.id}`}
-              className="flex-1 min-w-0 text-sm font-medium hover:text-gain transition-colors duration-150 truncate"
+              className="flex-1 min-w-0 text-sm font-medium hover:text-primary transition-colors duration-150 truncate"
             >
               {r.player.name}
             </Link>
@@ -99,9 +100,9 @@ export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
               {r.w}W {r.l}L
             </span>
 
-            {/* ΔELO — accent only for positive */}
+            {/* ΔELO — counts up, blue for gain, coral for loss */}
             <span
-              className={`w-14 text-right font-display text-sm nums font-semibold shrink-0 ${
+              className={`flex w-14 justify-end text-right font-display text-sm nums font-semibold shrink-0 ${
                 r.delta > 0
                   ? 'text-gain'
                   : r.delta < 0
@@ -110,7 +111,7 @@ export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
               }`}
             >
               {r.delta > 0 ? '+' : ''}
-              {r.delta}
+              <DeltaCounter from={0} to={r.delta} />
             </span>
           </li>
         ))}

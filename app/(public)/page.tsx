@@ -2,50 +2,41 @@ import Link from 'next/link'
 import { Leaderboard } from '@/components/leaderboard'
 import { RecentMatches } from '@/components/recent-matches'
 import { InFormCard } from '@/components/in-form-card'
+import { PixelRally } from '@/components/pixel-rally'
 
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6">
-
-      {/* ── Site header ── */}
-      <header className="mb-10 flex items-end justify-between border-b border-border pb-5">
-        <div>
-          <p className="font-display uppercase tracking-[0.2em] text-xs text-muted-foreground mb-1">
-            Drive.com.au
-          </p>
-          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight leading-none">
-            Table Tennis
-          </h1>
+      {/* ── Hero ── */}
+      <section className="mb-10 overflow-hidden rounded-xl border border-border bg-gradient-to-br from-secondary to-card">
+        <div className="grid items-center gap-6 p-6 md:grid-cols-[1fr_1.1fr] md:p-8">
+          <div>
+            <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-2">
+              Office Ladder · Live Standings
+            </p>
+            <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight leading-[0.95]">
+              Race to the top
+              <br />
+              of the table.
+            </h1>
+            <p className="mt-3 max-w-sm text-sm text-muted-foreground leading-relaxed">
+              Every rally moves the grid. Log a match, watch the ratings spin, and
+              chase pole position on the Drive table-tennis ladder.
+            </p>
+            <Link
+              href="/join"
+              className="mt-5 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
+            >
+              Join the ladder
+            </Link>
+          </div>
+          <div className="px-2 md:px-4">
+            <PixelRally />
+          </div>
         </div>
-        <nav className="flex items-center gap-1 text-sm">
-          <Link
-            href="/players"
-            className="px-3 py-1.5 text-muted-foreground hover:text-foreground transition-colors duration-150"
-          >
-            Players
-          </Link>
-          <Link
-            href="/matches"
-            className="px-3 py-1.5 text-muted-foreground hover:text-foreground transition-colors duration-150"
-          >
-            Matches
-          </Link>
-          <Link
-            href="/tournaments"
-            className="px-3 py-1.5 text-muted-foreground hover:text-foreground transition-colors duration-150"
-          >
-            Tournaments
-          </Link>
-          <Link
-            href="/join"
-            className="ml-2 px-3 py-1.5 border border-gain text-gain hover:bg-gain-muted font-medium transition-colors duration-150"
-          >
-            Join
-          </Link>
-        </nav>
-      </header>
+      </section>
 
       {/* ── Dashboard grid ── */}
       <div className="grid gap-8 md:grid-cols-[1fr_320px]">

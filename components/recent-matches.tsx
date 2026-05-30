@@ -26,8 +26,8 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
 
   return (
     <section>
-      <div className="section-header font-display">Recent</div>
-      <ul>
+      <div className="section-header font-display">Recent Results</div>
+      <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
           const aWon = r.winnerId === r.aId
           const sets = (r.setScores as Array<[number, number]>) ?? []
@@ -41,7 +41,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
                 href={`/players/${r.aId}`}
                 className={`shrink-0 transition-colors duration-150 ${
                   aWon
-                    ? 'font-semibold text-foreground hover:text-gain'
+                    ? 'font-semibold text-foreground hover:text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -61,7 +61,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
                 href={`/players/${r.bId}`}
                 className={`shrink-0 transition-colors duration-150 ${
                   !aWon
-                    ? 'font-semibold text-foreground hover:text-gain'
+                    ? 'font-semibold text-foreground hover:text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >

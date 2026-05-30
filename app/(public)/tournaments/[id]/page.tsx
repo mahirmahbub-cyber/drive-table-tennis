@@ -51,10 +51,23 @@ export default async function TournamentPage({
   const data = await loadTournament(id)
   if (!data) notFound()
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-4 text-2xl font-semibold">{data.tournament.name}</h1>
-      <p className="mb-6 text-sm text-zinc-500">Status: {data.tournament.status}</p>
-      <BracketView matches={data.bracket} />
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
+      <div className="mb-6 flex items-center gap-3">
+        <div>
+          <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-1">
+            Bracket
+          </p>
+          <h1 className="font-display text-3xl font-bold tracking-tight leading-none">
+            {data.tournament.name}
+          </h1>
+        </div>
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-wider text-primary">
+          {data.tournament.status.replace('_', ' ')}
+        </span>
+      </div>
+      <div className="rounded-lg border border-border bg-card p-1">
+        <BracketView matches={data.bracket} />
+      </div>
     </main>
   )
 }

@@ -32,7 +32,12 @@ export function BracketView({
         return (
           <div key={r} className="flex flex-col min-w-[180px]">
             {/* Round label */}
-            <div className="px-3 py-2 text-xs font-display uppercase tracking-widest text-muted-foreground border-b border-border">
+            <div
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display uppercase tracking-widest border-b border-border ${
+                isLast ? 'text-primary font-semibold' : 'text-muted-foreground'
+              }`}
+            >
+              {isLast && <CheckeredFlag />}
               {isLast ? 'Final' : roundIdx === totalRounds - 2 ? 'Semi' : `R${r}`}
             </div>
 
@@ -74,6 +79,26 @@ export function BracketView({
         )
       })}
     </div>
+  )
+}
+
+function CheckeredFlag() {
+  return (
+    <svg
+      width={12}
+      height={12}
+      viewBox="0 0 12 12"
+      aria-hidden
+      style={{ shapeRendering: 'crispEdges' as const }}
+    >
+      {[0, 1, 2, 3].map((row) =>
+        [0, 1, 2, 3].map((col) =>
+          (row + col) % 2 === 0 ? (
+            <rect key={`${row}-${col}`} x={col * 3} y={row * 3} width={3} height={3} fill="currentColor" />
+          ) : null,
+        ),
+      )}
+    </svg>
   )
 }
 

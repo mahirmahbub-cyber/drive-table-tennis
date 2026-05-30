@@ -29,31 +29,67 @@ export default async function MatchesPage() {
     .limit(200)
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-4 text-2xl font-semibold">Matches</h1>
-      <ul className="divide-y">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
+      <div className="mb-6">
+        <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-1">
+          Race Log
+        </p>
+        <h1 className="font-display text-3xl font-bold tracking-tight leading-none">
+          Matches
+        </h1>
+      </div>
+
+      <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
           const aWon = r.winnerId === r.aId
           const sets = (r.setScores as Array<[number, number]>) ?? []
           return (
-            <li key={r.id} className="flex items-center gap-4 py-3">
-              <div className="w-32 text-xs text-zinc-500">
-                {r.playedAt?.toLocaleString()}
-              </div>
-              <div className="flex-1">
-                <Link href={`/players/${r.aId}`} className={aWon ? 'font-semibold' : ''}>
-                  {r.aName}
-                </Link>
-                <span className="mx-2 font-mono tabular-nums text-zinc-500">
-                  {sets.map(([sa, sb]) => `${sa}-${sb}`).join('  ')}
-                </span>
-                <Link href={`/players/${r.bId}`} className={!aWon ? 'font-semibold' : ''}>
-                  {r.bName}
-                </Link>
-              </div>
+            <li key={r.id} className="data-row text-sm">
+              <span className="hidden w-28 shrink-0 font-mono text-[11px] text-muted-foreground sm:block">
+                {r.playedAt?.toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                })}
+                {', '}
+                {r.playedAt?.toLocaleTimeString(undefined, {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </span>
+
+              <span className={`w-1 h-4 rounded-full shrink-0 ${aWon ? 'bg-primary' : 'bg-transparent'}`} />
+              <Link
+                href={`/players/${r.aId}`}
+                className={`shrink-0 transition-colors duration-150 ${
+                  aWon
+                    ? 'font-semibold text-foreground hover:text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {r.aName}
+              </Link>
+
+              <span className="flex-1 text-center font-mono nums text-xs text-muted-foreground tracking-tight">
+                {sets.map(([sa, sb]) => `${sa}–${sb}`).join('  ')}
+              </span>
+
+              <Link
+                href={`/players/${r.bId}`}
+                className={`shrink-0 transition-colors duration-150 ${
+                  !aWon
+                    ? 'font-semibold text-foreground hover:text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {r.bName}
+              </Link>
+              <span className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-primary' : 'bg-transparent'}`} />
             </li>
           )
         })}
+        {rows.length === 0 && (
+          <li className="px-3 py-4 text-sm text-muted-foreground">No matches yet.</li>
+        )}
       </ul>
     </main>
   )
