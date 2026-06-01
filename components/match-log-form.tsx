@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration, parseDurationInput } from '@/lib/stats'
@@ -52,10 +52,11 @@ export function MatchLogForm({
   }, [])
 
   // Called by the stopwatch — syncs both duration and durationText display.
-  function handleStopwatchChange(seconds: number) {
+  // Stable reference so the stopwatch's interval effect doesn't restart every tick.
+  const handleStopwatchChange = useCallback((seconds: number) => {
     setDuration(seconds)
     setDurationText(seconds > 0 ? formatDuration(seconds) : '')
-  }
+  }, [])
 
   function handleDurationText(text: string) {
     setDurationText(text)
@@ -87,7 +88,7 @@ export function MatchLogForm({
   const setDefaults = initial?.sets ?? []
 
   return (
-    <form action={handle} className="space-y-6">
+    <form key={savedTick} action={handle} className="space-y-6">
       <input type="hidden" name="durationSeconds" value={duration || ''} readOnly />
 
       {/* Players */}

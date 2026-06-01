@@ -149,6 +149,7 @@ export async function editMatch(id: string, formData: FormData) {
   revalidatePath('/')
   revalidatePath('/matches')
   revalidatePath('/players')
+  revalidatePath('/admin/history')
   return { ok: true }
 }
 
@@ -158,6 +159,7 @@ export async function deleteMatch(id: string) {
   revalidatePath('/')
   revalidatePath('/matches')
   revalidatePath('/players')
+  revalidatePath('/admin/history')
 }
 
 export async function rebuildElo() {
