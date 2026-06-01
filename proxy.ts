@@ -13,6 +13,7 @@ export function proxy(req: NextRequest) {
 
   const url = req.nextUrl.clone()
   url.pathname = '/admin/login'
+  url.searchParams.set('next', pathname)
   return NextResponse.redirect(url)
 }
 
