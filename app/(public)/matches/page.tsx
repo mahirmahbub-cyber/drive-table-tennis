@@ -2,6 +2,7 @@ import { db, matches, players } from '@/lib/db'
 import { desc, eq, isNotNull } from 'drizzle-orm'
 import Link from 'next/link'
 import { alias } from 'drizzle-orm/pg-core'
+import { computeDurationRecords, formatDuration, type DurationMatch } from '@/lib/stats'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +21,7 @@ export default async function MatchesPage() {
       bName: b.name,
       eloAAfter: matches.eloAAfter,
       eloBAfter: matches.eloBAfter,
+      durationSeconds: matches.durationSeconds,
     })
     .from(matches)
     .innerJoin(a, eq(matches.playerAId, a.id))
@@ -27,6 +29,18 @@ export default async function MatchesPage() {
     .where(isNotNull(matches.playedAt))
     .orderBy(desc(matches.playedAt))
     .limit(200)
+
+  const durationMatches: DurationMatch[] = rows
+    .filter((r) => r.durationSeconds && r.playedAt)
+    .map((r) => ({
+      id: r.id,
+      playerAId: r.aId,
+      playerBId: r.bId,
+      winnerId: r.winnerId!,
+      durationSeconds: r.durationSeconds!,
+      playedAt: r.playedAt!,
+    }))
+  const records = computeDurationRecords(durationMatches)
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
@@ -38,6 +52,29 @@ export default async function MatchesPage() {
           Matches
         </h1>
       </div>
+
+      {records.totalCourtTimeSeconds > 0 && (
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-border bg-card px-4 py-3">
+            <div className="font-display uppercase tracking-widest text-[10px] text-muted-foreground">Longest match</div>
+            <div className="font-mono nums text-xl font-semibold">
+              {records.longestMatch ? formatDuration(records.longestMatch.durationSeconds) : '—'}
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card px-4 py-3">
+            <div className="font-display uppercase tracking-widest text-[10px] text-muted-foreground">Fastest game</div>
+            <div className="font-mono nums text-xl font-semibold">
+              {records.fastestWin ? formatDuration(records.fastestWin.durationSeconds) : '—'}
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card px-4 py-3">
+            <div className="font-display uppercase tracking-widest text-[10px] text-muted-foreground">Total court time</div>
+            <div className="font-mono nums text-xl font-semibold">
+              {formatDuration(records.totalCourtTimeSeconds)}
+            </div>
+          </div>
+        </div>
+      )}
 
       <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
@@ -83,6 +120,9 @@ export default async function MatchesPage() {
               >
                 {r.bName}
               </Link>
+              <span className="hidden w-14 shrink-0 text-right font-mono text-[11px] text-muted-foreground sm:block">
+                {r.durationSeconds ? formatDuration(r.durationSeconds) : ''}
+              </span>
               <span className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-primary' : 'bg-transparent'}`} />
             </li>
           )
