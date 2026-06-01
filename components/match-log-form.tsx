@@ -14,7 +14,7 @@ export function MatchLogForm({ players }: { players: PlayerOption[] }) {
     setPending(true)
     const r = await logMatch(formData)
     setPending(false)
-    if (r && 'error' in r) setError(r.error)
+    if (r && 'error' in r) setError(r.error ?? null)
   }
 
   return (

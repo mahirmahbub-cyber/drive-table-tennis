@@ -1,9 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { asc, eq, inArray } from 'drizzle-orm'
-import { db, matches, players, type Match } from '@/lib/db'
+import { db, matches, players } from '@/lib/db'
 import { applyMatch } from '@/lib/elo'
 import { replayHistory, type HistoryMatch } from '@/lib/elo-recompute'
 import { matchLogSchema } from '@/lib/validators'
@@ -32,6 +31,8 @@ export async function logMatch(formData: FormData) {
     playerAId: formData.get('playerAId'),
     playerBId: formData.get('playerBId'),
     sets: setsRaw,
+    playedAt: formData.get('playedAt'),
+    durationSeconds: formData.get('durationSeconds'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
@@ -55,7 +56,8 @@ export async function logMatch(formData: FormData) {
       playerBId: b.id,
       winnerId: winner === 'A' ? a.id : b.id,
       setScores: parsed.data.sets,
-      playedAt: new Date(),
+      playedAt: parsed.data.playedAt ?? new Date(),
+      durationSeconds: parsed.data.durationSeconds ?? null,
       eloABefore: a.currentElo,
       eloBBefore: b.currentElo,
       eloAAfter: elo.eloA,
@@ -70,7 +72,7 @@ export async function logMatch(formData: FormData) {
   revalidatePath('/players')
   revalidatePath(`/players/${a.id}`)
   revalidatePath(`/players/${b.id}`)
-  redirect('/')
+  return { ok: true }
 }
 
 async function replayAllAndWrite(): Promise<void> {
@@ -124,6 +126,8 @@ export async function editMatch(id: string, formData: FormData) {
     playerAId: formData.get('playerAId'),
     playerBId: formData.get('playerBId'),
     sets: setsRaw,
+    playedAt: formData.get('playedAt'),
+    durationSeconds: formData.get('durationSeconds'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
   const winner = inferWinner(parsed.data.sets)
@@ -136,6 +140,8 @@ export async function editMatch(id: string, formData: FormData) {
       playerBId: parsed.data.playerBId,
       winnerId: winner === 'A' ? parsed.data.playerAId : parsed.data.playerBId,
       setScores: parsed.data.sets,
+      playedAt: parsed.data.playedAt ?? undefined,
+      durationSeconds: parsed.data.durationSeconds ?? null,
     })
     .where(eq(matches.id, id))
 
@@ -143,7 +149,7 @@ export async function editMatch(id: string, formData: FormData) {
   revalidatePath('/')
   revalidatePath('/matches')
   revalidatePath('/players')
-  redirect('/matches')
+  return { ok: true }
 }
 
 export async function deleteMatch(id: string) {
