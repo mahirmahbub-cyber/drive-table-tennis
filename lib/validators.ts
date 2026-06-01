@@ -12,13 +12,22 @@ export const setScoreSchema = z.tuple([
   z.coerce.number().int().min(0).max(99),
 ])
 
-export const matchLogSchema = z.object({
-  playerAId: z.string().uuid(),
-  playerBId: z.string().uuid(),
-  sets: z.array(setScoreSchema).min(1).max(7),
-}).refine((d) => d.playerAId !== d.playerBId, {
-  message: 'A player cannot play themselves',
-})
+const emptyToUndefined = (v: unknown) => (v === '' || v == null ? undefined : v)
+
+export const matchLogSchema = z
+  .object({
+    playerAId: z.string().uuid(),
+    playerBId: z.string().uuid(),
+    sets: z.array(setScoreSchema).min(1).max(7),
+    playedAt: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
+    durationSeconds: z.preprocess(
+      emptyToUndefined,
+      z.coerce.number().int().min(0).max(86400).optional()
+    ),
+  })
+  .refine((d) => d.playerAId !== d.playerBId, {
+    message: 'A player cannot play themselves',
+  })
 
 export const tournamentCreateSchema = z.object({
   name: z.string().trim().min(1).max(80),

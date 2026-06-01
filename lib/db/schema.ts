@@ -60,6 +60,7 @@ export const matches = pgTable('matches', {
   }),
   round: integer('round'),
   bracketSlot: integer('bracket_slot'),
+  durationSeconds: integer('duration_seconds'),
   eloABefore: integer('elo_a_before'),
   eloBBefore: integer('elo_b_before'),
   eloAAfter: integer('elo_a_after'),
