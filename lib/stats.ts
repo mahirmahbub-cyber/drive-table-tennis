@@ -51,3 +51,66 @@ export function computeAboveExpectationScore(
   }
   return sum
 }
+
+export type DurationMatch = {
+  id: string
+  playerAId: string
+  playerBId: string
+  winnerId: string
+  durationSeconds: number
+  playedAt: Date
+}
+
+export function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+/** Accepts "mm:ss" or a plain seconds string. Returns total seconds, or null if invalid/empty. */
+export function parseDurationInput(input: string): number | null {
+  const trimmed = input.trim()
+  if (trimmed === '') return null
+  if (trimmed.includes(':')) {
+    const [mm, ss] = trimmed.split(':')
+    const min = Number(mm)
+    const sec = Number(ss)
+    if (!Number.isInteger(min) || !Number.isInteger(sec) || min < 0 || sec < 0 || sec > 59) {
+      return null
+    }
+    return min * 60 + sec
+  }
+  const n = Number(trimmed)
+  return Number.isInteger(n) && n >= 0 ? n : null
+}
+
+export function averageDurationForPlayer(
+  matches: DurationMatch[],
+  playerId: string
+): number | null {
+  const mine = matches.filter(
+    (x) => (x.playerAId === playerId || x.playerBId === playerId) && x.durationSeconds > 0
+  )
+  if (mine.length === 0) return null
+  const sum = mine.reduce((acc, x) => acc + x.durationSeconds, 0)
+  return Math.round(sum / mine.length)
+}
+
+export type DurationRecords = {
+  longestMatch: DurationMatch | null
+  fastestWin: DurationMatch | null
+  totalCourtTimeSeconds: number
+}
+
+export function computeDurationRecords(matches: DurationMatch[]): DurationRecords {
+  const timed = matches.filter((x) => x.durationSeconds > 0)
+  let longestMatch: DurationMatch | null = null
+  let fastestWin: DurationMatch | null = null
+  let totalCourtTimeSeconds = 0
+  for (const x of timed) {
+    totalCourtTimeSeconds += x.durationSeconds
+    if (!longestMatch || x.durationSeconds > longestMatch.durationSeconds) longestMatch = x
+    if (!fastestWin || x.durationSeconds < fastestWin.durationSeconds) fastestWin = x
+  }
+  return { longestMatch, fastestWin, totalCourtTimeSeconds }
+}

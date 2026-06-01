@@ -17,8 +17,15 @@ export default async function NewMatchPage() {
     .orderBy(asc(players.name))
 
   return (
-    <main className="mx-auto max-w-xl p-6">
-      <h1 className="mb-4 text-2xl font-semibold">Log a match</h1>
+    <main className="mx-auto w-full max-w-xl px-4 py-8 md:px-6">
+      <div className="mb-6">
+        <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-1">
+          Score Entry
+        </p>
+        <h1 className="font-display text-3xl font-bold tracking-tight leading-none">
+          Log a match
+        </h1>
+      </div>
       <MatchLogForm players={roster} />
     </main>
   )

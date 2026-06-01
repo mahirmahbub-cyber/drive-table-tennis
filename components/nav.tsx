@@ -30,6 +30,12 @@ export function AdminNav() {
       >
         Tournament
       </Link>
+      <Link
+        href="/admin/history"
+        className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors duration-150"
+      >
+        History
+      </Link>
 
       <form action={logout} className="ml-auto">
         <button

@@ -4,7 +4,7 @@ import { and, asc, eq, isNotNull, or } from 'drizzle-orm'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
 import { SpeedoGauge } from '@/components/speedo-gauge'
-import { classifyOpponentTier } from '@/lib/stats'
+import { classifyOpponentTier, averageDurationForPlayer, formatDuration, type DurationMatch } from '@/lib/stats'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -28,6 +28,18 @@ export default async function PlayerPage({
       )
     )
     .orderBy(asc(matches.playedAt))
+
+  const durationMatches: DurationMatch[] = playerMatches
+    .filter((m) => m.durationSeconds)
+    .map((m) => ({
+      id: m.id,
+      playerAId: m.playerAId!,
+      playerBId: m.playerBId!,
+      winnerId: m.winnerId!,
+      durationSeconds: m.durationSeconds!,
+      playedAt: m.playedAt!,
+    }))
+  const avgDuration = averageDurationForPlayer(durationMatches, id)
 
   const points = playerMatches.map((m, i) => {
     const isA = m.playerAId === id
@@ -94,6 +106,11 @@ export default async function PlayerPage({
               {winPct !== null && (
                 <span className="font-display font-semibold nums text-gain">
                   {winPct}% wins
+                </span>
+              )}
+              {avgDuration !== null && (
+                <span className="font-mono nums text-muted-foreground">
+                  avg {formatDuration(avgDuration)}/game
                 </span>
               )}
             </div>
