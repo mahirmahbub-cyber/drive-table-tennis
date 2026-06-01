@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import { Plus } from 'lucide-react'
+import { logout } from '@/app/actions/auth'
 
 const NAV = [
   { href: '/players', label: 'Players' },
@@ -29,12 +31,12 @@ function LogoMark() {
   )
 }
 
-export function SiteHeader() {
+export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4 md:px-6">
+      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-2 px-4 md:px-6">
         <Link href="/" className="group flex items-center gap-2.5">
           <LogoMark />
           <span className="hidden flex-col leading-none sm:flex">
@@ -69,6 +71,43 @@ export function SiteHeader() {
               </Link>
             )
           })}
+
+          {/* New game — visible to everyone; logged-out users get bounced to login */}
+          <Link
+            href="/admin/matches/new"
+            className="ml-1 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary sm:px-3"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New game
+          </Link>
+
+          {/* Admin auth controls */}
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/admin"
+                className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted sm:px-3"
+              >
+                Admin
+              </Link>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted sm:px-3"
+                >
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/admin/login"
+              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted sm:px-3"
+            >
+              Admin Log In
+            </Link>
+          )}
+
           <Link
             href="/join"
             className="ml-1 rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e] sm:ml-2 sm:px-3.5"

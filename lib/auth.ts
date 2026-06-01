@@ -27,3 +27,14 @@ export function verifySessionCookie(
 }
 
 export const ADMIN_COOKIE = COOKIE_NAME
+
+/**
+ * Returns `next` only if it's a safe internal admin path, else '/admin'.
+ * Guards against open redirects (//host, https://, non-admin routes).
+ */
+export function safeAdminNext(next: string | null | undefined): string {
+  if (typeof next !== 'string') return '/admin'
+  if (!next.startsWith('/admin')) return '/admin'
+  if (next.startsWith('//')) return '/admin'
+  return next
+}
