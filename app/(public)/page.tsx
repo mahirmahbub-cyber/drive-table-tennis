@@ -3,6 +3,7 @@ import { Leaderboard } from '@/components/leaderboard'
 import { RecentMatches } from '@/components/recent-matches'
 import { InFormCard } from '@/components/in-form-card'
 import { PixelRally } from '@/components/pixel-rally'
+import { JoinCta } from '@/components/join-cta'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +26,20 @@ export default function HomePage() {
               Every rally moves the grid. Log a match, watch the ratings spin, and
               chase pole position on the Drive table-tennis ladder.
             </p>
-            <Link
-              href="/join"
-              className="mt-5 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
-            >
-              Join the ladder
-            </Link>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link
+                href="/join"
+                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
+              >
+                Join the ladder
+              </Link>
+              <Link
+                href="/admin/matches/new"
+                className="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-secondary"
+              >
+                New game
+              </Link>
+            </div>
           </div>
           <div className="px-2 md:px-4">
             <PixelRally />
@@ -45,6 +54,7 @@ export default function HomePage() {
 
         {/* Right — secondary widgets */}
         <div className="space-y-8">
+          <JoinCta />
           <InFormCard />
           <RecentMatches />
         </div>
