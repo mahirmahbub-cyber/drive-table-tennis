@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration, parseDurationInput } from '@/lib/stats'
@@ -40,8 +40,16 @@ export function MatchLogForm({
     initial?.durationSeconds ? formatDuration(initial.durationSeconds) : ''
   )
   const [playedAt, setPlayedAt] = useState<string>(
-    () => initial?.playedAt ? toLocalDatetimeValue(initial.playedAt) : toLocalDatetimeValue(new Date())
+    initial?.playedAt ? toLocalDatetimeValue(initial.playedAt) : ''
   )
+
+  // Set "now" only on the client after mount to avoid SSR/client hydration mismatch
+  // on the datetime-local input. This is the canonical pattern for client-only init.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!isEdit && playedAt === '') setPlayedAt(toLocalDatetimeValue(new Date()))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Called by the stopwatch — syncs both duration and durationText display.
   function handleStopwatchChange(seconds: number) {
