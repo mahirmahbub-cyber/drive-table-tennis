@@ -71,3 +71,14 @@ describe('playerEloDelta', () => {
     expect(playerEloDelta({ eloABefore: null, eloAAfter: null, eloBBefore: null, eloBAfter: null }, true)).toBe(null)
   })
 })
+
+import { inferWinnerSide as sharedInfer } from '@/lib/match-format'
+
+describe('shared winner rule is the single source of truth', () => {
+  it('matches expected winners across representative cases', () => {
+    expect(sharedInfer([[11, 9], [8, 11], [11, 5]])).toBe('A')
+    expect(sharedInfer([[5, 11], [11, 7], [9, 11]])).toBe('B')
+    expect(sharedInfer([[11, 9], [9, 11]])).toBe(null) // 1-1 tie blocks save
+    expect(sharedInfer([[11, 9]])).toBe('A')           // single set
+  })
+})

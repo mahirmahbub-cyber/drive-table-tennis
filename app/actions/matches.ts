@@ -2,21 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { asc, eq, inArray } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { db, matches, players } from '@/lib/db'
 import { applyMatch } from '@/lib/elo'
 import { replayHistory, type HistoryMatch } from '@/lib/elo-recompute'
 import { matchLogSchema } from '@/lib/validators'
-
-function inferWinner(sets: Array<[number, number]>): 'A' | 'B' | null {
-  let a = 0
-  let b = 0
-  for (const [sa, sb] of sets) {
-    if (sa > sb) a++
-    else if (sb > sa) b++
-  }
-  if (a === b) return null
-  return a > b ? 'A' : 'B'
-}
+import { inferWinnerSide, type SetScore } from '@/lib/match-format'
 
 export async function logMatch(formData: FormData) {
   const setsRaw: Array<[number, number]> = []
@@ -36,7 +27,7 @@ export async function logMatch(formData: FormData) {
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  const winner = inferWinner(parsed.data.sets)
+  const winner = inferWinnerSide(parsed.data.sets)
   if (!winner) return { error: 'Sets are tied; cannot determine winner' }
 
   // Read current ratings
@@ -130,7 +121,7 @@ export async function editMatch(id: string, formData: FormData) {
     durationSeconds: formData.get('durationSeconds'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
-  const winner = inferWinner(parsed.data.sets)
+  const winner = inferWinnerSide(parsed.data.sets)
   if (!winner) return { error: 'Sets are tied' }
 
   await db
@@ -166,4 +157,48 @@ export async function rebuildElo() {
   await replayAllAndWrite()
   revalidatePath('/')
   revalidatePath('/players')
+}
+
+export type MatchDetail = {
+  id: string
+  playedAt: Date | null
+  durationSeconds: number | null
+  setScores: SetScore[]
+  aId: string
+  aName: string
+  bId: string
+  bName: string
+  winnerId: string | null
+  eloABefore: number | null
+  eloAAfter: number | null
+  eloBBefore: number | null
+  eloBAfter: number | null
+}
+
+export async function getMatchDetail(id: string): Promise<MatchDetail | null> {
+  const a = alias(players, 'a')
+  const b = alias(players, 'b')
+  const [row] = await db
+    .select({
+      id: matches.id,
+      playedAt: matches.playedAt,
+      durationSeconds: matches.durationSeconds,
+      setScores: matches.setScores,
+      aId: a.id,
+      aName: a.name,
+      bId: b.id,
+      bName: b.name,
+      winnerId: matches.winnerId,
+      eloABefore: matches.eloABefore,
+      eloAAfter: matches.eloAAfter,
+      eloBBefore: matches.eloBBefore,
+      eloBAfter: matches.eloBAfter,
+    })
+    .from(matches)
+    .innerJoin(a, eq(matches.playerAId, a.id))
+    .innerJoin(b, eq(matches.playerBId, b.id))
+    .where(eq(matches.id, id))
+    .limit(1)
+  if (!row) return null
+  return { ...row, setScores: (row.setScores as SetScore[]) ?? [] }
 }
