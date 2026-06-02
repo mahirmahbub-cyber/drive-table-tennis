@@ -6,10 +6,10 @@ export function AdminNav() {
     <nav className="flex items-center gap-0 border-b border-border bg-card text-sm">
       {/* Brand mark */}
       <Link
-        href="/admin"
+        href="/"
         className="font-display uppercase tracking-widest text-xs font-semibold px-4 py-3 border-r border-border hover:text-gain transition-colors duration-150"
       >
-        Admin
+        ← Back to home
       </Link>
 
       <Link
