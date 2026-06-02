@@ -48,18 +48,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Dashboard grid ── */}
-      <div className="grid gap-8 md:grid-cols-[1fr_320px]">
-        {/* Left — primary leaderboard */}
+      {/* ── Centered column: log → ladder → recent → join → in-form ── */}
+      <div className="mx-auto w-full max-w-2xl space-y-8">
+        <InlineLogger />
         <Leaderboard />
-
-        {/* Right — secondary widgets */}
-        <div className="space-y-8">
-          <InlineLogger />
-          <JoinCta />
-          <InFormCard />
-          <RecentMatches />
-        </div>
+        <RecentMatches />
+        <JoinCta />
+        <InFormCard />
       </div>
     </main>
   )

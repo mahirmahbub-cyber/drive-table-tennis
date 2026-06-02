@@ -44,7 +44,7 @@ export function PlayerGamesHistory({ rows }: { rows: HistoryRow[] }) {
               {r.eloDelta >= 0 ? '+' : '−'}{Math.abs(r.eloDelta)}
             </span>
           )}
-          <ViewGameButton id={r.id} variant="icon" />
+          <ViewGameButton id={r.id} />
         </li>
       ))}
     </ul>

@@ -1,6 +1,6 @@
 import { db, players } from '@/lib/db'
 import { asc, eq } from 'drizzle-orm'
-import { MatchLogForm } from '@/components/match-log-form'
+import { LogGameExpander } from '@/components/log-game-expander'
 
 export async function InlineLogger() {
   const roster = await db
@@ -14,13 +14,5 @@ export async function InlineLogger() {
     .where(eq(players.active, true))
     .orderBy(asc(players.name))
 
-  return (
-    <section
-      id="log"
-      className="scroll-mt-20 rounded-xl border border-primary/40 bg-card p-4 shadow-[0_0_0_2px_rgba(41,96,197,0.12)]"
-    >
-      <div className="section-header font-display text-primary">Log a game</div>
-      <MatchLogForm players={roster} />
-    </section>
-  )
+  return <LogGameExpander players={roster} />
 }

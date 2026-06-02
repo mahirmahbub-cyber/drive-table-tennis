@@ -71,7 +71,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
               <span
                 className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-gain' : 'bg-transparent'}`}
               />
-              <ViewGameButton id={r.id} variant="icon" />
+              <ViewGameButton id={r.id} />
             </li>
           )
         })}
