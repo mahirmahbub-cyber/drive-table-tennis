@@ -1,11 +1,14 @@
 import { notFound } from 'next/navigation'
 import { db, matches, players } from '@/lib/db'
 import { and, asc, eq, isNotNull, or } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
 import { SpeedoGauge } from '@/components/speedo-gauge'
 import { classifyOpponentTier, averageDurationForPlayer, formatDuration, type DurationMatch } from '@/lib/stats'
 import Link from 'next/link'
+import { PlayerGamesHistory, type HistoryRow } from '@/components/player-games-history'
+import { type SetScore } from '@/lib/match-format'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,15 +21,28 @@ export default async function PlayerPage({
   const [player] = await db.select().from(players).where(eq(players.id, id))
   if (!player) notFound()
 
+  const pa = alias(players, 'pa')
+  const pb = alias(players, 'pb')
   const playerMatches = await db
-    .select()
+    .select({
+      id: matches.id,
+      playerAId: matches.playerAId,
+      playerBId: matches.playerBId,
+      winnerId: matches.winnerId,
+      setScores: matches.setScores,
+      playedAt: matches.playedAt,
+      durationSeconds: matches.durationSeconds,
+      eloABefore: matches.eloABefore,
+      eloAAfter: matches.eloAAfter,
+      eloBBefore: matches.eloBBefore,
+      eloBAfter: matches.eloBAfter,
+      aName: pa.name,
+      bName: pb.name,
+    })
     .from(matches)
-    .where(
-      and(
-        isNotNull(matches.playedAt),
-        or(eq(matches.playerAId, id), eq(matches.playerBId, id))
-      )
-    )
+    .innerJoin(pa, eq(matches.playerAId, pa.id))
+    .innerJoin(pb, eq(matches.playerBId, pb.id))
+    .where(and(isNotNull(matches.playedAt), or(eq(matches.playerAId, id), eq(matches.playerBId, id))))
     .orderBy(asc(matches.playedAt))
 
   const durationMatches: DurationMatch[] = playerMatches
@@ -68,6 +84,22 @@ export default async function PlayerPage({
 
   const winPct =
     wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : null
+
+  const historyRows: HistoryRow[] = [...playerMatches].reverse().map((m) => {
+    const playerIsA = m.playerAId === id
+    return {
+      id: m.id,
+      playedAt: m.playedAt!.toISOString(),
+      playerIsA,
+      iWon: m.winnerId === id,
+      opponentId: playerIsA ? m.playerBId! : m.playerAId!,
+      opponentName: playerIsA ? m.bName : m.aName,
+      sets: (m.setScores as SetScore[]) ?? [],
+      eloDelta: playerIsA
+        ? (m.eloAAfter! - m.eloABefore!)
+        : (m.eloBAfter! - m.eloBBefore!),
+    }
+  })
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
@@ -127,6 +159,12 @@ export default async function PlayerPage({
       <section className="mb-8">
         <div className="section-header font-display">ELO Trajectory</div>
         <EloChart data={points} />
+      </section>
+
+      {/* ── Games History ── */}
+      <section className="mb-8">
+        <div className="section-header font-display">Games History</div>
+        <PlayerGamesHistory rows={historyRows} />
       </section>
 
       {/* ── Tier breakdown ── */}
