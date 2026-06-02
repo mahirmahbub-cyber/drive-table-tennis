@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration, parseDurationInput } from '@/lib/stats'
+import { Stepper } from '@/components/stepper'
+import { inferWinnerSide, setsWon, type SetScore } from '@/lib/match-format'
 
 type PlayerOption = { id: string; name: string; nickname: string | null; currentElo: number }
 
@@ -42,6 +44,20 @@ export function MatchLogForm({
   const [playedAt, setPlayedAt] = useState<string>(
     initial?.playedAt ? toLocalDatetimeValue(initial.playedAt) : ''
   )
+
+  // New state for Quick/Full mode toggle and score tracking
+  const initialSetCount = Math.min(7, Math.max(1, initial?.sets.length ?? 1))
+  const initialMode: 'quick' | 'full' = initial && initial.sets.length > 1 ? 'full' : 'quick'
+  const [mode, setMode] = useState<'quick' | 'full'>(initialMode)
+  const [setCount, setSetCount] = useState(initialSetCount)
+  const [scores, setScores] = useState<Array<[string, string]>>(
+    Array.from({ length: 7 }, (_, i) => [
+      initial?.sets[i]?.[0]?.toString() ?? '',
+      initial?.sets[i]?.[1]?.toString() ?? '',
+    ])
+  )
+  const [aId, setAId] = useState(initial?.playerAId ?? '')
+  const [bId, setBId] = useState(initial?.playerBId ?? '')
 
   // Set "now" only on the client after mount to avoid SSR/client hydration mismatch
   // on the datetime-local input. This is the canonical pattern for client-only init.
@@ -82,20 +98,57 @@ export function MatchLogForm({
       setDuration(0)
       setDurationText('')
       setPlayedAt(toLocalDatetimeValue(new Date()))
+      setScores(Array.from({ length: 7 }, () => ['', '']))
+      setSetCount(1)
+      setMode('quick')
+      setAId('')
+      setBId('')
     }
   }
 
-  const setDefaults = initial?.sets ?? []
+  // Derive live winner badge
+  const nameFor = (id: string) => players.find((p) => p.id === id)?.name ?? 'Player'
+  const activeSets: SetScore[] = scores
+    .slice(0, mode === 'quick' ? 1 : setCount)
+    .filter(([a, b]) => a !== '' && b !== '')
+    .map(([a, b]) => [Number(a), Number(b)] as SetScore)
+  const winnerSide = inferWinnerSide(activeSets)
+  const tally = setsWon(activeSets)
+  const badge = (() => {
+    if (activeSets.length === 0) return null
+    if (winnerSide === null) return { tone: 'tie' as const, text: 'Tied — adjust the score' }
+    const winnerName = winnerSide === 'A' ? nameFor(aId) : nameFor(bId)
+    if (mode === 'quick') {
+      const [a, b] = activeSets[0]
+      return { tone: 'win' as const, text: `${winnerName} wins · ${a}–${b}` }
+    }
+    return { tone: 'win' as const, text: `${winnerName} wins the match (${tally.a}–${tally.b})` }
+  })()
 
   return (
     <form key={savedTick} action={handle} className="space-y-6">
       <input type="hidden" name="durationSeconds" value={duration || ''} readOnly />
 
+      {/* Mode toggle */}
+      <div className="flex gap-1 rounded-lg bg-secondary p-1">
+        {(['quick', 'full'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              mode === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+            }`}
+          >
+            {m === 'quick' ? 'Quick' : 'Full match'}
+          </button>
+        ))}
+      </div>
+
       {/* Players */}
       <div className="grid grid-cols-2 gap-4">
         {(['A', 'B'] as const).map((side) => {
           const fieldName = side === 'A' ? 'playerAId' : 'playerBId'
-          const def = side === 'A' ? initial?.playerAId : initial?.playerBId
           return (
             <label key={side} className="block">
               <span className="font-display uppercase tracking-widest text-xs text-muted-foreground">
@@ -104,7 +157,8 @@ export function MatchLogForm({
               <select
                 name={fieldName}
                 required
-                defaultValue={def ?? ''}
+                value={side === 'A' ? aId : bId}
+                onChange={(e) => side === 'A' ? setAId(e.target.value) : setBId(e.target.value)}
                 className="mt-1.5 w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">—</option>
@@ -121,30 +175,64 @@ export function MatchLogForm({
 
       {/* Set scores */}
       <fieldset className="space-y-2">
-        <legend className="section-header font-display w-full">Set scores</legend>
-        {Array.from({ length: 7 }).map((_, i) => (
+        <legend className="section-header font-display w-full">
+          {mode === 'quick' ? 'Score' : 'Sets'}
+        </legend>
+        {Array.from({ length: mode === 'quick' ? 1 : setCount }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <span className="w-12 font-mono text-xs text-muted-foreground">Set {i + 1}</span>
-            <input
+            {mode === 'full' && (
+              <span className="w-12 font-mono text-xs text-muted-foreground">Set {i + 1}</span>
+            )}
+            <Stepper
               name={`set_${i}_a`}
-              type="number"
-              min={0}
-              max={99}
-              defaultValue={setDefaults[i]?.[0] ?? ''}
-              className="w-20 rounded-md border border-input bg-card px-2 py-1.5 font-mono nums text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              ariaLabel={`set ${i + 1} player A`}
+              defaultValue={scores[i][0] === '' ? '' : Number(scores[i][0])}
+              onValueChange={(v) =>
+                setScores((s) => { const n = [...s]; n[i] = [v === '' ? '' : String(v), n[i][1]]; return n })
+              }
             />
             <span className="text-muted-foreground">–</span>
-            <input
+            <Stepper
               name={`set_${i}_b`}
-              type="number"
-              min={0}
-              max={99}
-              defaultValue={setDefaults[i]?.[1] ?? ''}
-              className="w-20 rounded-md border border-input bg-card px-2 py-1.5 font-mono nums text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              ariaLabel={`set ${i + 1} player B`}
+              defaultValue={scores[i][1] === '' ? '' : Number(scores[i][1])}
+              onValueChange={(v) =>
+                setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
+              }
             />
+            {mode === 'full' && setCount > 1 && (
+              <button
+                type="button"
+                aria-label={`remove set ${i + 1}`}
+                onClick={() => setSetCount((c) => Math.max(1, c - 1))}
+                className="text-muted-foreground hover:text-loss"
+              >
+                ×
+              </button>
+            )}
           </div>
         ))}
+        {mode === 'full' && setCount < 7 && (
+          <button
+            type="button"
+            onClick={() => setSetCount((c) => Math.min(7, c + 1))}
+            className="rounded-md border border-dashed border-input px-3 py-1.5 text-sm text-primary"
+          >
+            ＋ Add set
+          </button>
+        )}
       </fieldset>
+
+      {/* Live winner badge */}
+      {badge && (
+        <div className={`rounded-md border px-3 py-2 text-sm text-center ${
+          badge.tone === 'win'
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-border text-muted-foreground'
+        }`}>
+          {badge.text}
+        </div>
+      )}
 
       {/* Duration */}
       <div className="space-y-2">
