@@ -73,13 +73,13 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           })}
 
           {/* Log a game — visible to everyone; scrolls to the inline logger */}
-          <Link
+          <a
             href="/#log"
             className="ml-1 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary sm:px-3"
           >
             <Plus className="h-3.5 w-3.5" />
             Log a game
-          </Link>
+          </a>
 
           {/* Admin auth controls */}
           {isLoggedIn ? (
