@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { db, matches, players } from '@/lib/db'
 import { alias } from 'drizzle-orm/pg-core'
 import { desc, eq, isNotNull } from 'drizzle-orm'
+import { ViewGameButton } from '@/components/view-game-button'
 
 export async function RecentMatches({ limit = 8 }: { limit?: number }) {
   const a = alias(players, 'a')
@@ -70,6 +71,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
               <span
                 className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-gain' : 'bg-transparent'}`}
               />
+              <ViewGameButton id={r.id} variant="icon" />
             </li>
           )
         })}

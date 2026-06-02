@@ -3,6 +3,7 @@ import { desc, eq, isNotNull } from 'drizzle-orm'
 import Link from 'next/link'
 import { alias } from 'drizzle-orm/pg-core'
 import { computeDurationRecords, formatDuration, type DurationMatch } from '@/lib/stats'
+import { ViewGameButton } from '@/components/view-game-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -124,6 +125,7 @@ export default async function MatchesPage() {
                 {r.durationSeconds ? formatDuration(r.durationSeconds) : ''}
               </span>
               <span className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-primary' : 'bg-transparent'}`} />
+              <ViewGameButton id={r.id} />
             </li>
           )
         })}
