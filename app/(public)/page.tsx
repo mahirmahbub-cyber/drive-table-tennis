@@ -4,6 +4,7 @@ import { RecentMatches } from '@/components/recent-matches'
 import { InFormCard } from '@/components/in-form-card'
 import { PixelRally } from '@/components/pixel-rally'
 import { JoinCta } from '@/components/join-cta'
+import { InlineLogger } from '@/components/inline-logger'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,12 +34,12 @@ export default function HomePage() {
               >
                 Join the ladder
               </Link>
-              <Link
-                href="/admin/matches/new"
+              <a
+                href="#log"
                 className="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-secondary"
               >
-                New game
-              </Link>
+                Log a game
+              </a>
             </div>
           </div>
           <div className="px-2 md:px-4">
@@ -54,6 +55,7 @@ export default function HomePage() {
 
         {/* Right — secondary widgets */}
         <div className="space-y-8">
+          <InlineLogger />
           <JoinCta />
           <InFormCard />
           <RecentMatches />
