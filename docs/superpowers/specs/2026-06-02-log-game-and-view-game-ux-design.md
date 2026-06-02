@@ -70,25 +70,25 @@ The existing form is reused and extended; the server actions (`logMatch`, `editM
   - **ELO impact** — per player: delta (`+16` / `−16`, coloured) and `before → after`. Computed from stored `eloXBefore/After`.
   - Meta: duration (if any).
   - Player names link to `/players/[id]`.
-- **`MatchRowTrigger`** (new client wrapper) — wraps a row's content in a button that opens `MatchDetailModal` for that `id`. Used by all surfaces below.
+- **`ViewGameButton`** (new client component) — a small, explicit **"View game"** affordance rendered at the end of each row (a labelled button on wide rows / an expand-chevron icon on compact rows like Recent results). Clicking it opens `MatchDetailModal` for that `id`. It sits as a **sibling** of the existing player-name `Link`s, never wrapping them.
 
-**Interactivity note:** to avoid nested interactive elements (a link inside a button), surfaces that currently link player names within a row will make the **whole row open the modal** instead; the modal provides the linked player names. This is a deliberate, documented change (see Risks).
+**Interactivity note:** player names keep their hyperlinks to `/players/[id]`. The view-game modal is opened only by the dedicated `ViewGameButton`, so there are **no nested interactive elements** (no link inside a button) — both behaviours coexist on the same row.
 
 ### 4. Surfaces that adopt the trigger
 
 | Surface | File | Change |
 |---|---|---|
-| Matches list | `app/(public)/matches/page.tsx` | Each `<li>` becomes a `MatchRowTrigger`. Visual layout unchanged. |
-| Recent results | `components/recent-matches.tsx` | Each row becomes a `MatchRowTrigger`. |
+| Matches list | `app/(public)/matches/page.tsx` | Add a `ViewGameButton` to each `<li>`; player-name links unchanged. |
+| Recent results | `components/recent-matches.tsx` | Add a `ViewGameButton` (chevron) to each row; player-name links unchanged. |
 | Player history | `app/(public)/players/[id]/page.tsx` | New section (below ELO chart) — see #5. |
 
-The matches list and recent-matches queries already select `id`; no query change needed for them to act as triggers.
+The matches list and recent-matches queries already select `id`; no query change needed to wire up the button.
 
 ### 5. Player games-history (`app/(public)/players/[id]/page.tsx`)
 
 - The page **already loads `playerMatches`** (all of the player's matches, ordered). A new **`PlayerGamesHistory`** section renders below the ELO chart — no new query.
 - Each row: date, **W/L badge** (from `winnerId === playerId`), `vs Opponent` (the opponent's name — needs opponent names; extend the existing `playerMatches` select to join opponent name, or do a light follow-up lookup), score (single-set → raw `11–7`; multi-set → sets-won `2–1`), and **this player's ELO delta** for that game (`eloAAfter − eloABefore` or the B-side equivalent, depending on which side the player was).
-- Rows are `MatchRowTrigger`s opening the shared modal.
+- Each row carries a `ViewGameButton` opening the shared modal; the opponent name remains a link to their player page.
 - Display order: most-recent first (reverse of the chart's chronological order).
 
 ### 6. Admin nav (`components/nav.tsx`)
@@ -103,7 +103,7 @@ The matches list and recent-matches queries already select `id`; no query change
 `InlineLogger` (server, loads roster) → `MatchLogForm` (client, Quick/Full) → existing `logMatch` server action → DB insert + ELO update via `applyMatch` → `revalidatePath('/')` refreshes leaderboard/recent in place.
 
 **Viewing a game (any surface):**
-List row (`MatchRowTrigger`, has match `id`) → opens `MatchDetailModal` → calls `getMatchDetail(id)` → renders sets + ELO impact + duration.
+List row's `ViewGameButton` (has match `id`) → opens `MatchDetailModal` → calls `getMatchDetail(id)` → renders sets + ELO impact + duration. Player-name links on the row navigate to `/players/[id]` independently.
 
 ## Error handling
 
@@ -126,12 +126,12 @@ List row (`MatchRowTrigger`, has match `id`) → opens `MatchDetailModal` → ca
 
 ## Risks & tradeoffs
 
-- **Whole-row-opens-modal replaces in-row player links** on the matches and recent-results lists. Mitigation: the modal exposes linked player names, so navigation is preserved in one extra click. Documented for review.
+- **Two interactions per row** (player links + a view-game button). Mitigation: the view-game trigger is a visually distinct, dedicated affordance (labelled button / chevron) sitting beside the links, so the click targets are unambiguous and there are no nested interactive elements.
 - **Public logging = no abuse protection.** Accepted explicitly (office honour system). Edit/delete remain admin-only, so bad entries are correctable.
 - **`getMatchDetail` adds one query per modal open.** Acceptable; keeps list surfaces light and avoids over-fetching ELO/duration everywhere.
 
 ## Open questions (non-blocking — sensible defaults chosen)
 
 1. **`JoinCta` placement.** The logger takes the top of the right column; `JoinCta` moves below it (kept) unless you'd rather drop it. *Default: keep, moved down.*
-2. **Retire `/admin/matches/new`?** Logging now lives on the home page. *Default: leave it (harmless admin convenience), repoint the public "New game" buttons to the home logger.*
+2. **Retire `/admin/matches/new`?** Decided: **keep for now, retire later.** Logging now lives on the home page; the public "New game" buttons repoint to the home logger, and the admin route stays as a convenience until a later cleanup.
 3. **"New game" buttons → home logger.** Hero + header buttons scroll to / focus the inline logger. *Default: yes.*
