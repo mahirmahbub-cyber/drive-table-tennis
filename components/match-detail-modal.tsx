@@ -16,7 +16,6 @@ export function MatchDetailModal({
   useEffect(() => {
     if (!open) return
     let cancelled = false
-    setLoading(true)
     getMatchDetail(id).then((d) => {
       if (!cancelled) { setDetail(d); setLoading(false) }
     })

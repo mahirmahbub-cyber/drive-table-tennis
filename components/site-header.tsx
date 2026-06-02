@@ -73,6 +73,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           })}
 
           {/* Log a game — visible to everyone; scrolls to the inline logger */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
           <a
             href="/#log"
             className="ml-1 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary sm:px-3"

@@ -5,7 +5,6 @@ import {
   formatScoreForPlayer,
   playerEloDelta,
   isSingleSet,
-  type SetScore,
 } from '@/lib/match-format'
 
 describe('inferWinnerSide', () => {
