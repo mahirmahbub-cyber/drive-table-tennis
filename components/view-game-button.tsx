@@ -13,7 +13,7 @@ export function ViewGameButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="View game details"
+        aria-label={variant === 'icon' ? 'View game details' : undefined}
         className={
           variant === 'icon'
             ? 'rounded-md p-1 text-muted-foreground transition-colors hover:text-primary hover:bg-secondary'
