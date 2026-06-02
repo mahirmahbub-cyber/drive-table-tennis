@@ -8,7 +8,7 @@ import { SpeedoGauge } from '@/components/speedo-gauge'
 import { classifyOpponentTier, averageDurationForPlayer, formatDuration, type DurationMatch } from '@/lib/stats'
 import Link from 'next/link'
 import { PlayerGamesHistory, type HistoryRow } from '@/components/player-games-history'
-import { type SetScore } from '@/lib/match-format'
+import { playerEloDelta, type SetScore } from '@/lib/match-format'
 
 export const dynamic = 'force-dynamic'
 
@@ -95,9 +95,7 @@ export default async function PlayerPage({
       opponentId: playerIsA ? m.playerBId! : m.playerAId!,
       opponentName: playerIsA ? m.bName : m.aName,
       sets: (m.setScores as SetScore[]) ?? [],
-      eloDelta: playerIsA
-        ? (m.eloAAfter! - m.eloABefore!)
-        : (m.eloBAfter! - m.eloBBefore!),
+      eloDelta: playerEloDelta(m, playerIsA),
     }
   })
 
