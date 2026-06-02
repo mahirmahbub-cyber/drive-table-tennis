@@ -200,7 +200,7 @@ export function MatchLogForm({
                 setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
               }
             />
-            {mode === 'full' && setCount > 1 && (
+            {mode === 'full' && setCount > 1 && i === setCount - 1 && (
               <button
                 type="button"
                 aria-label={`remove set ${i + 1}`}
