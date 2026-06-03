@@ -2,7 +2,7 @@ export type EngineMatch = {
   id: string
   playerAId: string
   playerBId: string
-  winnerId: string
+  winnerId: string | null
   setScores: [number, number][]
   durationSeconds: number | null
   playedAt: Date
@@ -39,6 +39,7 @@ export type PlayerStats = {
   avgMargin: number | null
   avgPointsPerSet: number | null
   avgGameSeconds: number | null
+  totalPlayingSeconds: number
   peakElo: number
   lastPlayedAt: Date | null
 }
@@ -53,12 +54,13 @@ export function playerAggregates(
     .filter((m) => m.playerAId === playerId || m.playerBId === playerId)
     .sort((x, y) => x.playedAt.getTime() - y.playedAt.getTime())
 
-  let wins = 0, losses = 0, pointsFor = 0, pointsAgainst = 0, marginSum = 0, setSum = 0, durSum = 0, durCount = 0, peakElo = currentElo
+  let wins = 0, losses = 0, gameCount = 0
+  let pointsFor = 0, pointsAgainst = 0, marginSum = 0, setSum = 0
+  let durSum = 0, durCount = 0, peakElo = currentElo
   let streak = 0, longest = 0, run = 0
 
   for (const m of mine) {
     const isA = m.playerAId === playerId
-    const won = m.winnerId === playerId
     const p = matchPoints(m)
     pointsFor += isA ? p.aFor : p.bFor
     pointsAgainst += isA ? p.aAgainst : p.bAgainst
@@ -67,27 +69,33 @@ export function playerAggregates(
     if (m.durationSeconds) { durSum += m.durationSeconds; durCount++ }
     const eloAfter = isA ? m.eloAAfter : m.eloBAfter
     if (eloAfter > peakElo) peakElo = eloAfter
-    if (won) { wins++; run = run >= 0 ? run + 1 : 1; if (run > longest) longest = run }
-    else { losses++; run = run <= 0 ? run - 1 : -1 }
-    streak = run
+
+    for (const [sa, sb] of m.setScores) {
+      if (sa === sb) continue
+      const iWonGame = isA ? sa > sb : sb > sa
+      gameCount++
+      if (iWonGame) { wins++; run = run >= 0 ? run + 1 : 1; if (run > longest) longest = run }
+      else { losses++; run = run <= 0 ? run - 1 : -1 }
+      streak = run
+    }
   }
 
-  const games = mine.length
-  const enough = games >= minGames
+  const enough = gameCount >= minGames
   return {
     playerId,
-    games,
+    games: gameCount,
     wins,
     losses,
-    winPct: enough && games > 0 ? Math.round((wins / games) * 100) : null,
+    winPct: enough && gameCount > 0 ? Math.round((wins / gameCount) * 100) : null,
     currentStreak: streak,
     longestWinStreak: longest,
     pointsFor,
     pointsAgainst,
     pointsRatio: enough && pointsAgainst > 0 ? pointsFor / pointsAgainst : null,
-    avgMargin: enough && games > 0 ? Math.round((marginSum / games) * 10) / 10 : null,
+    avgMargin: enough && mine.length > 0 ? Math.round((marginSum / mine.length) * 10) / 10 : null,
     avgPointsPerSet: enough && setSum > 0 ? Math.round((pointsFor / setSum) * 10) / 10 : null,
     avgGameSeconds: durCount > 0 ? Math.round(durSum / durCount) : null,
+    totalPlayingSeconds: durSum,
     peakElo,
     lastPlayedAt: mine.length ? mine[mine.length - 1].playedAt : null,
   }
@@ -132,6 +140,7 @@ export function upsetOfWeek(all: EngineMatch[], since: Date): EngineMatch | null
   let best: EngineMatch | null = null
   let bestGap = 0
   for (const m of inWindow(all, since)) {
+    if (!m.winnerId) continue
     const gap = loserBefore(m) - winnerBefore(m)
     if (gap > bestGap) { bestGap = gap; best = m }
   }
@@ -182,8 +191,12 @@ export function headToHead(all: EngineMatch[], p1: string, p2: string): { p1Wins
   for (const m of all) {
     const pair = [m.playerAId, m.playerBId]
     if (!pair.includes(p1) || !pair.includes(p2)) continue
-    if (m.winnerId === p1) p1Wins++
-    else if (m.winnerId === p2) p2Wins++
+    const p1IsA = m.playerAId === p1
+    for (const [sa, sb] of m.setScores) {
+      if (sa === sb) continue
+      const p1WonGame = p1IsA ? sa > sb : sb > sa
+      if (p1WonGame) p1Wins++; else p2Wins++
+    }
   }
   return { p1Wins, p2Wins }
 }

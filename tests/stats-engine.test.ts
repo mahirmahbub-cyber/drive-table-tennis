@@ -53,17 +53,18 @@ describe('playerAggregates', () => {
 
   it('computes record, streak and points stats for player A', () => {
     const s = playerAggregates(matches, 'A', 1216)
-    expect(s.games).toBe(3)
-    expect(s.wins).toBe(2)
-    expect(s.losses).toBe(1)
-    expect(s.winPct).toBe(67)
-    expect(s.currentStreak).toBe(-1)
-    expect(s.longestWinStreak).toBe(2)
+    expect(s.games).toBe(5)
+    expect(s.wins).toBe(3)
+    expect(s.losses).toBe(2)
+    expect(s.winPct).toBe(60)
+    expect(s.currentStreak).toBe(-2)
+    expect(s.longestWinStreak).toBe(3)
     expect(s.peakElo).toBe(1222)
     expect(s.pointsFor).toBe(46)
     expect(s.pointsAgainst).toBe(43)
     expect(s.pointsRatio).toBeCloseTo(46 / 43, 3)
     expect(s.avgGameSeconds).toBe(467)
+    expect(s.totalPlayingSeconds).toBe(1400)
   })
 
   it('returns null rate stats below the min-sample guard', () => {
@@ -111,7 +112,7 @@ describe('weekly window', () => {
   })
 
   it('headToHead: win counts per side', () => {
-    expect(headToHead(ms, 'A', 'B')).toEqual({ p1Wins: 1, p2Wins: 1 })
+    expect(headToHead(ms, 'A', 'B')).toEqual({ p1Wins: 1, p2Wins: 2 })
   })
 
   it('participation: distinct players and games in window', () => {
