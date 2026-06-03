@@ -66,7 +66,7 @@ export default async function HomePage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <div className="space-y-8 min-w-0">
           <SuperlativesStrip data={data} now={now} movers={weekMovers} />
-          <Leaderboard players={data.activePlayers} movers={weekMovers} />
+          <Leaderboard players={data.activePlayers} movers={weekMovers} wlById={data.wlById} />
         </div>
         <div className="space-y-8">
           <RivalryWatch data={data} now={now} />
