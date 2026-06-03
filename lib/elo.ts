@@ -26,3 +26,24 @@ export function applyMatch(
     deltaB,
   }
 }
+
+/**
+ * Applies ELO per game, threading the rating through each game in order.
+ * Games with an equal score are skipped (no result). Returns the net
+ * before→after for the whole sitting.
+ */
+export function applyGames(
+  eloA: number,
+  eloB: number,
+  games: Array<[number, number]>
+): MatchResult {
+  let a = eloA
+  let b = eloB
+  for (const [ga, gb] of games) {
+    if (ga === gb) continue
+    const r = applyMatch(a, b, ga > gb ? 'A' : 'B')
+    a = r.eloA
+    b = r.eloB
+  }
+  return { eloA: a, eloB: b, deltaA: a - eloA, deltaB: b - eloB }
+}
