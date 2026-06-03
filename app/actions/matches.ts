@@ -1,11 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { asc, eq, inArray } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db, matches, players } from '@/lib/db'
 import { applyMatch } from '@/lib/elo'
-import { replayHistory, type HistoryMatch } from '@/lib/elo-recompute'
+import { rebuildEloFromHistory } from '@/lib/elo-rebuild'
 import { matchLogSchema } from '@/lib/validators'
 import { inferWinnerSide, type SetScore } from '@/lib/match-format'
 
@@ -66,44 +66,6 @@ export async function logMatch(formData: FormData) {
   return { ok: true }
 }
 
-async function replayAllAndWrite(): Promise<void> {
-  const allMatches = await db
-    .select()
-    .from(matches)
-    .orderBy(asc(matches.playedAt), asc(matches.createdAt))
-  const allPlayers = await db.select({ id: players.id }).from(players)
-
-  const history: HistoryMatch[] = allMatches
-    .filter((m) => m.playerAId && m.playerBId && m.winnerId && m.playedAt)
-    .map((m) => ({
-      id: m.id,
-      playerAId: m.playerAId!,
-      playerBId: m.playerBId!,
-      winner: m.winnerId === m.playerAId ? 'A' : 'B',
-    }))
-
-  const result = replayHistory(
-    history,
-    allPlayers.map((p) => p.id)
-  )
-
-  await db.transaction(async (tx) => {
-    for (const r of result.replayed) {
-      await tx
-        .update(matches)
-        .set({
-          eloABefore: r.eloABefore,
-          eloBBefore: r.eloBBefore,
-          eloAAfter: r.eloAAfter,
-          eloBAfter: r.eloBAfter,
-        })
-        .where(eq(matches.id, r.id))
-    }
-    for (const [playerId, elo] of result.currentElo.entries()) {
-      await tx.update(players).set({ currentElo: elo }).where(eq(players.id, playerId))
-    }
-  })
-}
 
 export async function editMatch(id: string, formData: FormData) {
   const setsRaw: Array<[number, number]> = []
@@ -136,7 +98,7 @@ export async function editMatch(id: string, formData: FormData) {
     })
     .where(eq(matches.id, id))
 
-  await replayAllAndWrite()
+  await rebuildEloFromHistory()
   revalidatePath('/')
   revalidatePath('/matches')
   revalidatePath('/players')
@@ -146,7 +108,7 @@ export async function editMatch(id: string, formData: FormData) {
 
 export async function deleteMatch(id: string) {
   await db.delete(matches).where(eq(matches.id, id))
-  await replayAllAndWrite()
+  await rebuildEloFromHistory()
   revalidatePath('/')
   revalidatePath('/matches')
   revalidatePath('/players')
@@ -154,7 +116,7 @@ export async function deleteMatch(id: string) {
 }
 
 export async function rebuildElo() {
-  await replayAllAndWrite()
+  await rebuildEloFromHistory()
   revalidatePath('/')
   revalidatePath('/players')
 }
