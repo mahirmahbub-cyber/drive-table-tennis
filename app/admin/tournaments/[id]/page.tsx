@@ -3,6 +3,7 @@ import { db, matches, players, tournaments } from '@/lib/db'
 import { alias } from 'drizzle-orm/pg-core'
 import { asc, eq } from 'drizzle-orm'
 import { BracketView, type BracketMatch } from '@/components/bracket-view'
+import { TournamentManageActions } from '@/components/admin/tournament-row-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,15 +53,15 @@ export default async function ManageTournamentPage({
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-4 text-2xl font-semibold">{data.tournament.name}</h1>
-      <p className="mb-6 text-sm text-zinc-500">Status: {data.tournament.status}</p>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold">{data.tournament.name}</h1>
+        <TournamentManageActions id={id} name={data.tournament.name} />
+      </div>
+      <p className="mb-2 text-sm text-zinc-500">Status: {data.tournament.status}</p>
+      <p className="mb-6 text-xs text-muted-foreground">Tip: click any match with both players set to record or fix its result. Editing an early-round result re-advances the immediate next match only — deeper rounds aren&apos;t auto-rewritten.</p>
       <BracketView
         matches={data.bracket}
-        href={(m) =>
-          m.playerA && m.playerB && !m.winnerId
-            ? `/admin/tournaments/${id}/match/${m.id}`
-            : null
-        }
+        href={(m) => (m.playerA && m.playerB ? `/admin/tournaments/${id}/match/${m.id}` : null)}
       />
     </main>
   )
