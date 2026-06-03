@@ -1,16 +1,25 @@
 import Link from 'next/link'
+import { PixelRally } from '@/components/pixel-rally'
+import { InlineLogger } from '@/components/inline-logger'
 import { Leaderboard } from '@/components/leaderboard'
 import { RecentMatches } from '@/components/recent-matches'
-import { InFormCard } from '@/components/in-form-card'
-import { PixelRally } from '@/components/pixel-rally'
 import { JoinCta } from '@/components/join-cta'
-import { InlineLogger } from '@/components/inline-logger'
+import { SuperlativesStrip } from '@/components/home/superlatives-strip'
+import { RivalryWatch } from '@/components/home/rivalry-watch'
+import { ByTheNumbers } from '@/components/home/by-the-numbers'
+import { loadHomeData } from '@/lib/home-data'
+import { movers } from '@/lib/stats-engine'
 
 export const dynamic = 'force-dynamic'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const data = await loadHomeData()
+  const now = Date.now()
+  const since = new Date(now - 7 * 86400 * 1000)
+  const weekMovers = movers(data.engineMatches, since)
+
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
       {/* ── Hero ── */}
       <section className="mb-10 overflow-hidden rounded-xl border border-border bg-gradient-to-br from-secondary to-card">
         <div className="grid items-center gap-6 p-6 md:grid-cols-[1fr_1.1fr] md:p-8">
@@ -48,13 +57,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Centered column: log → ladder → recent → join → in-form ── */}
-      <div className="mx-auto w-full max-w-2xl space-y-8">
+      {/* ── Logger (centered) ── */}
+      <div className="mx-auto mb-8 w-full max-w-2xl">
         <InlineLogger />
-        <Leaderboard />
-        <RecentMatches />
-        <JoinCta />
-        <InFormCard />
+      </div>
+
+      {/* ── Championship HQ: wide on lg, stacked on mobile ── */}
+      <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-8 min-w-0">
+          <SuperlativesStrip data={data} now={now} movers={weekMovers} />
+          <Leaderboard players={data.activePlayers} movers={weekMovers} />
+        </div>
+        <div className="space-y-8">
+          <RivalryWatch data={data} now={now} />
+          <ByTheNumbers data={data} now={now} />
+          <JoinCta />
+          <RecentMatches />
+        </div>
       </div>
     </main>
   )
