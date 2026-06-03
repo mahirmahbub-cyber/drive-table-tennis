@@ -1,13 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, gte, inArray, or } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db, matches, players } from '@/lib/db'
-import { applyMatch } from '@/lib/elo'
+import { applyGames } from '@/lib/elo'
 import { rebuildEloFromHistory } from '@/lib/elo-rebuild'
 import { matchLogSchema } from '@/lib/validators'
 import { inferWinnerSide, type SetScore } from '@/lib/match-format'
+import { DEDUP_WINDOW_MS, isDuplicateMatch } from '@/lib/match-dedup'
 
 export async function logMatch(formData: FormData) {
   const setsRaw: Array<[number, number]> = []
@@ -27,10 +28,39 @@ export async function logMatch(formData: FormData) {
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  const winner = inferWinnerSide(parsed.data.sets)
-  if (!winner) return { error: 'Sets are tied; cannot determine winner' }
+  // ── Duplicate guard: identical sitting for this pair within the window ──
+  const nowMs = Date.now()
+  const recent = await db
+    .select({
+      playerAId: matches.playerAId,
+      playerBId: matches.playerBId,
+      setScores: matches.setScores,
+      createdAt: matches.createdAt,
+    })
+    .from(matches)
+    .where(
+      and(
+        gte(matches.createdAt, new Date(nowMs - DEDUP_WINDOW_MS)),
+        or(
+          and(eq(matches.playerAId, parsed.data.playerAId), eq(matches.playerBId, parsed.data.playerBId)),
+          and(eq(matches.playerAId, parsed.data.playerBId), eq(matches.playerBId, parsed.data.playerAId))
+        )
+      )
+    )
+  const dup = recent.some((r) =>
+    isDuplicateMatch(
+      {
+        playerAId: r.playerAId,
+        playerBId: r.playerBId,
+        setScores: (r.setScores as Array<[number, number]>) ?? null,
+        createdAtMs: r.createdAt.getTime(),
+      },
+      { playerAId: parsed.data.playerAId, playerBId: parsed.data.playerBId, sets: parsed.data.sets },
+      nowMs
+    )
+  )
+  if (dup) return { error: 'Looks like that match was just logged.' }
 
-  // Read current ratings
   const both = await db
     .select()
     .from(players)
@@ -39,13 +69,15 @@ export async function logMatch(formData: FormData) {
   const b = both.find((p) => p.id === parsed.data.playerBId)
   if (!a || !b) return { error: 'Player not found' }
 
-  const elo = applyMatch(a.currentElo, b.currentElo, winner)
+  const winner = inferWinnerSide(parsed.data.sets) // null when tied
+  const elo = applyGames(a.currentElo, b.currentElo, parsed.data.sets)
+  const winnerId = winner === 'A' ? a.id : winner === 'B' ? b.id : null
 
   await db.transaction(async (tx) => {
     await tx.insert(matches).values({
       playerAId: a.id,
       playerBId: b.id,
-      winnerId: winner === 'A' ? a.id : b.id,
+      winnerId,
       setScores: parsed.data.sets,
       playedAt: parsed.data.playedAt ?? new Date(),
       durationSeconds: parsed.data.durationSeconds ?? null,
@@ -83,15 +115,16 @@ export async function editMatch(id: string, formData: FormData) {
     durationSeconds: formData.get('durationSeconds'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
-  const winner = inferWinnerSide(parsed.data.sets)
-  if (!winner) return { error: 'Sets are tied' }
+  const winner = inferWinnerSide(parsed.data.sets) // null when tied — allowed for casual
+  const winnerId =
+    winner === 'A' ? parsed.data.playerAId : winner === 'B' ? parsed.data.playerBId : null
 
   await db
     .update(matches)
     .set({
       playerAId: parsed.data.playerAId,
       playerBId: parsed.data.playerBId,
-      winnerId: winner === 'A' ? parsed.data.playerAId : parsed.data.playerBId,
+      winnerId,
       setScores: parsed.data.sets,
       playedAt: parsed.data.playedAt ?? undefined,
       durationSeconds: parsed.data.durationSeconds ?? null,
