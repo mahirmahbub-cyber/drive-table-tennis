@@ -6,6 +6,7 @@ import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
 import { SpeedoGauge } from '@/components/speedo-gauge'
 import { classifyOpponentTier, averageDurationForPlayer, formatDuration, type DurationMatch } from '@/lib/stats'
+import { playerAggregates, type EngineMatch } from '@/lib/stats-engine'
 import Link from 'next/link'
 import { PlayerGamesHistory, type HistoryRow } from '@/components/player-games-history'
 import { playerEloDelta, type SetScore } from '@/lib/match-format'
@@ -63,8 +64,18 @@ export default async function PlayerPage({
     return { t: m.playedAt!.getTime(), elo, label: `#${i + 1}` }
   })
 
-  let wins = 0
-  let losses = 0
+  const engineMatches: EngineMatch[] = playerMatches
+    .filter((m) => ((m.setScores as SetScore[] | null)?.length ?? 0) > 0)
+    .map((m) => ({
+      id: m.id, playerAId: m.playerAId!, playerBId: m.playerBId!, winnerId: m.winnerId,
+      setScores: (m.setScores as [number, number][]) ?? [], durationSeconds: m.durationSeconds, playedAt: m.playedAt!,
+      eloABefore: m.eloABefore ?? 1200, eloAAfter: m.eloAAfter ?? 1200, eloBBefore: m.eloBBefore ?? 1200, eloBAfter: m.eloBAfter ?? 1200,
+    }))
+  const stats = playerAggregates(engineMatches, id, player.currentElo)
+  const wins = stats.wins
+  const losses = stats.losses
+  const winPct = stats.winPct
+
   const tier = {
     higher: { w: 0, l: 0 },
     similar: { w: 0, l: 0 },
@@ -72,18 +83,15 @@ export default async function PlayerPage({
   }
   for (const m of playerMatches) {
     const isA = m.playerAId === id
-    const iWon = m.winnerId === id
-    if (iWon) wins++
-    else losses++
     const myEloBefore = isA ? m.eloABefore! : m.eloBBefore!
     const oppEloBefore = isA ? m.eloBBefore! : m.eloABefore!
     const t = classifyOpponentTier(myEloBefore, oppEloBefore)
-    if (iWon) tier[t].w++
-    else tier[t].l++
+    for (const [sa, sb] of (m.setScores as SetScore[]) ?? []) {
+      if (sa === sb) continue
+      const iWonGame = isA ? sa > sb : sb > sa
+      if (iWonGame) tier[t].w++; else tier[t].l++
+    }
   }
-
-  const winPct =
-    wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : null
 
   const historyRows: HistoryRow[] = [...playerMatches].reverse().map((m) => {
     const playerIsA = m.playerAId === id
@@ -134,14 +142,14 @@ export default async function PlayerPage({
                 <span className="font-mono nums text-foreground">{losses}</span>L
               </span>
               {winPct !== null && (
-                <span className="font-display font-semibold nums text-gain">
-                  {winPct}% wins
-                </span>
+                <span className="font-display font-semibold nums text-gain">{winPct}% wins</span>
+              )}
+              <span className="font-mono nums">{stats.games} games</span>
+              {stats.totalPlayingSeconds > 0 && (
+                <span className="font-mono nums">{formatDuration(stats.totalPlayingSeconds)} played</span>
               )}
               {avgDuration !== null && (
-                <span className="font-mono nums text-muted-foreground">
-                  avg {formatDuration(avgDuration)}/game
-                </span>
+                <span className="font-mono nums text-muted-foreground">avg {formatDuration(avgDuration)}/game</span>
               )}
             </div>
           </div>
