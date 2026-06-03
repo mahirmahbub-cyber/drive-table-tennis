@@ -21,6 +21,8 @@ export default async function MatchRecordPage({
     await recordTournamentResult(matchId, formData)
   }
 
+  const existing = (m.setScores as Array<[number, number]> | null) ?? []
+
   return (
     <main className="mx-auto max-w-md p-6">
       <h1 className="mb-4 text-xl font-semibold">
@@ -29,10 +31,10 @@ export default async function MatchRecordPage({
       <form action={action} className="space-y-2">
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="w-12 text-sm text-zinc-500">Set {i + 1}</span>
-            <input name={`set_${i}_a`} type="number" min={0} max={99} className="w-20 rounded border px-2 py-1" />
+            <span className="w-12 text-sm text-zinc-500">Game {i + 1}</span>
+            <input name={`set_${i}_a`} type="number" min={0} max={99} defaultValue={existing[i]?.[0] ?? ''} className="w-20 rounded border px-2 py-1" />
             <span>–</span>
-            <input name={`set_${i}_b`} type="number" min={0} max={99} className="w-20 rounded border px-2 py-1" />
+            <input name={`set_${i}_b`} type="number" min={0} max={99} defaultValue={existing[i]?.[1] ?? ''} className="w-20 rounded border px-2 py-1" />
           </div>
         ))}
         <button type="submit" className="rounded bg-black px-4 py-2 text-white">
