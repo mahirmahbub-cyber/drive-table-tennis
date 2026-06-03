@@ -1,10 +1,10 @@
-import { applyMatch, STARTING_ELO } from './elo'
+import { applyGames, STARTING_ELO } from './elo'
 
 export type HistoryMatch = {
   id: string
   playerAId: string
   playerBId: string
-  winner: 'A' | 'B'
+  games: Array<[number, number]>
 }
 
 export type ReplayedMatch = HistoryMatch & {
@@ -20,11 +20,9 @@ export type ReplayResult = {
 }
 
 /**
- * Replays a chronologically-ordered list of matches, returning each match's
- * before/after ELOs and every player's final rating.
- *
- * `playerIds` is the universe of players we want a current ELO for; players
- * without matches still get STARTING_ELO.
+ * Replays chronologically-ordered matches, applying ELO per game within each
+ * match. Returns each match's net before/after ELOs and every player's final
+ * rating. `playerIds` is the universe of players to seed at STARTING_ELO.
  */
 export function replayHistory(
   history: HistoryMatch[],
@@ -37,16 +35,10 @@ export function replayHistory(
   for (const match of history) {
     const eloABefore = currentElo.get(match.playerAId) ?? STARTING_ELO
     const eloBBefore = currentElo.get(match.playerBId) ?? STARTING_ELO
-    const { eloA, eloB } = applyMatch(eloABefore, eloBBefore, match.winner)
+    const { eloA, eloB } = applyGames(eloABefore, eloBBefore, match.games)
     currentElo.set(match.playerAId, eloA)
     currentElo.set(match.playerBId, eloB)
-    replayed.push({
-      ...match,
-      eloABefore,
-      eloBBefore,
-      eloAAfter: eloA,
-      eloBAfter: eloB,
-    })
+    replayed.push({ ...match, eloABefore, eloBBefore, eloAAfter: eloA, eloBAfter: eloB })
   }
 
   return { currentElo, replayed }
