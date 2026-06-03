@@ -34,6 +34,10 @@ export const tournamentCreateSchema = z.object({
   playerIds: z.array(z.string().uuid()).min(2).max(64),
 })
 
+export const tournamentRenameSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+})
+
 export type PlayerCreateInput = z.infer<typeof playerCreateSchema>
 export type MatchLogInput = z.infer<typeof matchLogSchema>
 export type TournamentCreateInput = z.infer<typeof tournamentCreateSchema>

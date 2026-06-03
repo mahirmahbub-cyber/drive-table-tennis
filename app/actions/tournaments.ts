@@ -6,7 +6,7 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { db, matches, players, tournaments, tournamentEntries } from '@/lib/db'
 import { generateBracket } from '@/lib/bracket'
 import { rebuildEloFromHistory } from '@/lib/elo-rebuild'
-import { tournamentCreateSchema } from '@/lib/validators'
+import { tournamentCreateSchema, tournamentRenameSchema } from '@/lib/validators'
 
 export async function createTournament(formData: FormData) {
   const name = String(formData.get('name') ?? '')
@@ -129,4 +129,24 @@ export async function recordTournamentResult(matchId: string, formData: FormData
   revalidatePath('/players')
   revalidatePath('/')
   return { ok: true }
+}
+
+export async function renameTournament(id: string, formData: FormData) {
+  const parsed = tournamentRenameSchema.safeParse({ name: formData.get('name') })
+  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  await db.update(tournaments).set({ name: parsed.data.name }).where(eq(tournaments.id, id))
+  revalidatePath('/admin/tournaments')
+  revalidatePath(`/admin/tournaments/${id}`)
+  revalidatePath('/tournaments')
+  return { ok: true }
+}
+
+export async function deleteTournament(id: string) {
+  // Matches cascade via the FK onDelete: 'cascade'.
+  await db.delete(tournaments).where(eq(tournaments.id, id))
+  await rebuildEloFromHistory()
+  revalidatePath('/admin/tournaments')
+  revalidatePath('/tournaments')
+  revalidatePath('/players')
+  revalidatePath('/')
 }
