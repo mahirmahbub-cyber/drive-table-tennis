@@ -151,6 +151,7 @@ export function demolitionOfWeek(all: EngineMatch[], since: Date): EngineMatch |
   let best: EngineMatch | null = null
   let bestMargin = -1
   for (const m of inWindow(all, since)) {
+    if (!m.winnerId) continue
     const margin = matchMargin(m)
     if (margin > bestMargin) { bestMargin = margin; best = m }
   }

@@ -9,7 +9,7 @@ const WINDOW_DAYS = 7
 
 export function SuperlativesStrip({ data, now, movers }: { data: HomeData; now: number; movers: Mover[] }) {
   const since = new Date(now - WINDOW_DAYS * 86400 * 1000)
-  const name = (id: string) => data.nameById.get(id)?.name ?? '—'
+  const name = (id: string | null | undefined) => (id ? data.nameById.get(id)?.name : undefined) ?? '—'
 
   const topMover = movers[0]
   const upset = upsetOfWeek(data.engineMatches, since)

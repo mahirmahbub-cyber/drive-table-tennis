@@ -31,6 +31,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
       <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
           const aWon = r.winnerId === r.aId
+          const bWon = r.winnerId === r.bId
           const sets = (r.setScores as Array<[number, number]>) ?? []
           return (
             <li key={r.id} className="data-row text-sm">
@@ -61,7 +62,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
               <Link
                 href={`/players/${r.bId}`}
                 className={`shrink-0 transition-colors duration-150 ${
-                  !aWon
+                  bWon
                     ? 'font-semibold text-foreground hover:text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -69,7 +70,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
                 {r.bName}
               </Link>
               <span
-                className={`w-1 h-4 rounded-full shrink-0 ${!aWon ? 'bg-gain' : 'bg-transparent'}`}
+                className={`w-1 h-4 rounded-full shrink-0 ${bWon ? 'bg-gain' : 'bg-transparent'}`}
               />
               <ViewGameButton id={r.id} />
             </li>

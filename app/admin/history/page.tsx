@@ -105,6 +105,7 @@ export default async function AdminHistoryPage({
       <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
           const aWon = r.winnerId === r.aId
+          const bWon = r.winnerId === r.bId
           const sets = (r.setScores as Array<[number, number]>) ?? []
           return (
             <li key={r.id} className="data-row text-sm">
@@ -115,7 +116,7 @@ export default async function AdminHistoryPage({
               <span className="flex-1 text-center font-mono nums text-xs text-muted-foreground">
                 {sets.map(([sa, sb]) => `${sa}–${sb}`).join('  ')}
               </span>
-              <span className={`shrink-0 ${!aWon ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>{r.bName}</span>
+              <span className={`shrink-0 ${bWon ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>{r.bName}</span>
               <span className="hidden w-16 shrink-0 text-right font-mono text-[11px] text-muted-foreground sm:block">
                 {r.durationSeconds ? formatDuration(r.durationSeconds) : '—'}
               </span>
