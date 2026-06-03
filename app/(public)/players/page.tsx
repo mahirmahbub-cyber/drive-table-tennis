@@ -1,6 +1,8 @@
 import Link from 'next/link'
-import { desc, eq } from 'drizzle-orm'
-import { db, players } from '@/lib/db'
+import { desc, eq, isNotNull, and, asc } from 'drizzle-orm'
+import { db, players, matches } from '@/lib/db'
+import { playerAggregates, type EngineMatch } from '@/lib/stats-engine'
+import { formatDuration } from '@/lib/stats'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { SpeedoGauge } from '@/components/speedo-gauge'
 
@@ -12,6 +14,16 @@ export default async function PlayersPage() {
     .from(players)
     .where(eq(players.active, true))
     .orderBy(desc(players.currentElo))
+
+  const raw = await db.select().from(matches).where(and(isNotNull(matches.playedAt))).orderBy(asc(matches.playedAt))
+  const engineMatches: EngineMatch[] = raw
+    .filter((m) => m.playerAId && m.playerBId && m.playedAt && (m.setScores?.length ?? 0) > 0)
+    .map((m) => ({
+      id: m.id, playerAId: m.playerAId!, playerBId: m.playerBId!, winnerId: m.winnerId,
+      setScores: (m.setScores as [number, number][]) ?? [], durationSeconds: m.durationSeconds, playedAt: m.playedAt!,
+      eloABefore: m.eloABefore ?? 1200, eloAAfter: m.eloAAfter ?? 1200, eloBBefore: m.eloBBefore ?? 1200, eloBAfter: m.eloBAfter ?? 1200,
+    }))
+  const statsById = new Map(roster.map((p) => [p.id, playerAggregates(engineMatches, p.id, p.currentElo)] as const))
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
@@ -54,6 +66,13 @@ export default async function PlayersPage() {
                     {p.bio}
                   </div>
                 )}
+                {(() => { const s = statsById.get(p.id)!; return (
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-mono nums text-muted-foreground">
+                    <span><span className="text-gain">{s.wins}</span>W <span className="text-loss">{s.losses}</span>L</span>
+                    <span>{s.games} games</span>
+                    {s.totalPlayingSeconds > 0 && <span>{formatDuration(s.totalPlayingSeconds)} played</span>}
+                  </div>
+                ) })()}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 <SpeedoGauge elo={p.currentElo} size="sm" />
