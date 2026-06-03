@@ -45,3 +45,14 @@ export function playerEloDelta(elo: EloPair, playerIsA: boolean): number | null 
   if (before == null || after == null) return null
   return after - before
 }
+
+/** Game-level alias of setsWon: games won per side, ignoring equal-score games. */
+export function gamesWon(games: SetScore[]): { a: number; b: number } {
+  return setsWon(games)
+}
+
+/** Player-oriented "gamesWon–gamesLost" string for a sitting, e.g. "2–1". */
+export function gameTally(games: SetScore[], playerIsA: boolean): string {
+  const { a, b } = setsWon(games)
+  return playerIsA ? `${a}–${b}` : `${b}–${a}`
+}

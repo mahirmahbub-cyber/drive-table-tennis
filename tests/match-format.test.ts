@@ -5,6 +5,8 @@ import {
   formatScoreForPlayer,
   playerEloDelta,
   isSingleSet,
+  gamesWon,
+  gameTally,
 } from '@/lib/match-format'
 
 describe('inferWinnerSide', () => {
@@ -68,6 +70,17 @@ describe('playerEloDelta', () => {
   })
   it('null before/after → null', () => {
     expect(playerEloDelta({ eloABefore: null, eloAAfter: null, eloBBefore: null, eloBAfter: null }, true)).toBe(null)
+  })
+})
+
+describe('gamesWon / gameTally', () => {
+  it('counts games won per side, ignoring equal scores', () => {
+    expect(gamesWon([[11, 9], [8, 11], [11, 6]])).toEqual({ a: 2, b: 1 })
+    expect(gamesWon([[11, 11]])).toEqual({ a: 0, b: 0 })
+  })
+  it('formats a player-oriented tally', () => {
+    expect(gameTally([[11, 9], [8, 11], [11, 6]], true)).toBe('2–1')
+    expect(gameTally([[11, 9], [8, 11], [11, 6]], false)).toBe('1–2')
   })
 })
 
