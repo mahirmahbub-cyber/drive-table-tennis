@@ -2,10 +2,10 @@ import Link from 'next/link'
 import { PlayerAvatar } from './player-avatar'
 import { AnimatedRow } from './motion/animated-row'
 import { ArrowUp, ArrowDown } from 'lucide-react'
-import type { HomePlayer } from '@/lib/home-data'
+import type { HomePlayer, PlayerWL } from '@/lib/home-data'
 import type { Mover } from '@/lib/stats-engine'
 
-export function Leaderboard({ players, movers }: { players: HomePlayer[]; movers: Mover[] }) {
+export function Leaderboard({ players, movers, wlById }: { players: HomePlayer[]; movers: Mover[]; wlById: Map<string, PlayerWL> }) {
   const ranked = [...players].sort((a, b) => b.currentElo - a.currentElo).slice(0, 20)
   const leaderElo = ranked[0]?.currentElo ?? 0
   const moveById = new Map(movers.map((m) => [m.playerId, m.delta] as const))
@@ -15,6 +15,7 @@ export function Leaderboard({ players, movers }: { players: HomePlayer[]; movers
       <div className="section-header font-display flex items-center justify-between">
         <span>Starting Grid</span>
         <span className="flex items-center gap-4 normal-case tracking-normal text-[10px] text-muted-foreground/70">
+          <span className="w-14 text-right">W–L</span>
           <span className="w-12 text-right">7d</span>
           <span className="w-10 text-right">Rating</span>
           <span className="w-12 text-right">Gap</span>
@@ -36,6 +37,11 @@ export function Leaderboard({ players, movers }: { players: HomePlayer[]; movers
                 </span>
                 {p.nickname && <span className="block truncate text-xs text-muted-foreground">&ldquo;{p.nickname}&rdquo;</span>}
               </Link>
+              {(() => { const wl = wlById.get(p.id); return (
+                <span className="w-14 shrink-0 text-right font-mono text-xs nums text-muted-foreground">
+                  {wl ? `${wl.wins}–${wl.losses}` : '—'}
+                </span>
+              ) })()}
               <span className={`flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-xs nums ${mv > 0 ? 'text-gain' : mv < 0 ? 'text-loss' : 'text-muted-foreground/50'}`}>
                 {mv > 0 && <ArrowUp className="h-3 w-3" />}
                 {mv < 0 && <ArrowDown className="h-3 w-3" />}
