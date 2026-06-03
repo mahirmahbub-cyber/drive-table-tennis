@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration, parseDurationInput } from '@/lib/stats'
@@ -58,6 +58,7 @@ export function MatchLogForm({
   )
   const [aId, setAId] = useState(initial?.playerAId ?? '')
   const [bId, setBId] = useState(initial?.playerBId ?? '')
+  const submitting = useRef(false)
 
   // Set "now" only on the client after mount to avoid SSR/client hydration mismatch
   // on the datetime-local input. This is the canonical pattern for client-only init.
@@ -82,27 +83,33 @@ export function MatchLogForm({
   }
 
   async function handle(formData: FormData) {
+    if (submitting.current) return
+    submitting.current = true
     setError(null)
     setPending(true)
-    const r = isEdit
-      ? await editMatch(initial!.id, formData)
-      : await logMatch(formData)
-    setPending(false)
-    if (r && 'error' in r) {
-      setError(r.error ?? null)
-      return
-    }
-    if (onSuccess) onSuccess()
-    if (!isEdit) {
-      setSavedTick((t) => t + 1)
-      setDuration(0)
-      setDurationText('')
-      setPlayedAt(toLocalDatetimeValue(new Date()))
-      setScores(Array.from({ length: 7 }, () => ['', '']))
-      setSetCount(1)
-      setMode('quick')
-      setAId('')
-      setBId('')
+    try {
+      const r = isEdit
+        ? await editMatch(initial!.id, formData)
+        : await logMatch(formData)
+      if (r && 'error' in r) {
+        setError(r.error ?? null)
+        return
+      }
+      if (onSuccess) onSuccess()
+      if (!isEdit) {
+        setSavedTick((t) => t + 1)
+        setDuration(0)
+        setDurationText('')
+        setPlayedAt(toLocalDatetimeValue(new Date()))
+        setScores(Array.from({ length: 7 }, () => ['', '']))
+        setSetCount(1)
+        setMode('quick')
+        setAId('')
+        setBId('')
+      }
+    } finally {
+      setPending(false)
+      submitting.current = false
     }
   }
 
@@ -176,16 +183,16 @@ export function MatchLogForm({
       {/* Set scores */}
       <fieldset className="space-y-2">
         <legend className="section-header font-display w-full">
-          {mode === 'quick' ? 'Score' : 'Sets'}
+          {mode === 'quick' ? 'Score' : 'Games'}
         </legend>
         {Array.from({ length: mode === 'quick' ? 1 : setCount }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">
             {mode === 'full' && (
-              <span className="w-12 font-mono text-xs text-muted-foreground">Set {i + 1}</span>
+              <span className="w-12 font-mono text-xs text-muted-foreground">Game {i + 1}</span>
             )}
             <Stepper
               name={`set_${i}_a`}
-              ariaLabel={`set ${i + 1} player A`}
+              ariaLabel={`game ${i + 1} player A`}
               defaultValue={scores[i][0] === '' ? '' : Number(scores[i][0])}
               onValueChange={(v) =>
                 setScores((s) => { const n = [...s]; n[i] = [v === '' ? '' : String(v), n[i][1]]; return n })
@@ -194,7 +201,7 @@ export function MatchLogForm({
             <span className="text-muted-foreground">–</span>
             <Stepper
               name={`set_${i}_b`}
-              ariaLabel={`set ${i + 1} player B`}
+              ariaLabel={`game ${i + 1} player B`}
               defaultValue={scores[i][1] === '' ? '' : Number(scores[i][1])}
               onValueChange={(v) =>
                 setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
@@ -203,7 +210,7 @@ export function MatchLogForm({
             {mode === 'full' && setCount > 1 && i === setCount - 1 && (
               <button
                 type="button"
-                aria-label={`remove set ${i + 1}`}
+                aria-label={`remove game ${i + 1}`}
                 onClick={() => setSetCount((c) => Math.max(1, c - 1))}
                 className="text-muted-foreground hover:text-loss"
               >
@@ -218,7 +225,7 @@ export function MatchLogForm({
             onClick={() => setSetCount((c) => Math.min(7, c + 1))}
             className="rounded-md border border-dashed border-input px-3 py-1.5 text-sm text-primary"
           >
-            ＋ Add set
+            ＋ Add game
           </button>
         )}
       </fieldset>
@@ -272,8 +279,14 @@ export function MatchLogForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
       >
+        {pending && (
+          <span
+            className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
+            aria-hidden
+          />
+        )}
         {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Save match'}
       </button>
     </form>
