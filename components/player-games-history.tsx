@@ -17,7 +17,7 @@ export type HistoryRow = {
 
 export function PlayerGamesHistory({ rows }: { rows: HistoryRow[] }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">No games yet.</p>
+    return <p className="text-sm text-muted-foreground">No races yet — challenge someone and log your first game.</p>
   }
   return (
     <ul className="rounded-lg border border-border overflow-hidden bg-card">

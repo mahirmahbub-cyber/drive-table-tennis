@@ -130,7 +130,7 @@ export default async function MatchesPage() {
           )
         })}
         {rows.length === 0 && (
-          <li className="px-3 py-4 text-sm text-muted-foreground">No matches yet.</li>
+          <li className="px-3 py-4 text-sm text-muted-foreground">No races logged yet. The first result sets the grid.</li>
         )}
       </ul>
     </main>

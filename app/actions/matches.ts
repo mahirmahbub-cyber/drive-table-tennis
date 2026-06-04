@@ -9,6 +9,14 @@ import { rebuildEloFromHistory } from '@/lib/elo-rebuild'
 import { matchLogSchema } from '@/lib/validators'
 import { inferWinnerSide, type SetScore } from '@/lib/match-format'
 import { DEDUP_WINDOW_MS, isDuplicateMatch } from '@/lib/match-dedup'
+import { rankWithin } from '@/lib/stats-engine'
+
+export type LogResult = {
+  aId: string; aName: string; bId: string; bName: string
+  winnerId: string | null
+  eloABefore: number; eloAAfter: number; eloBBefore: number; eloBAfter: number
+  aRankBefore: number; aRankAfter: number; bRankBefore: number; bRankAfter: number
+}
 
 export async function logMatch(formData: FormData) {
   const setsRaw: Array<[number, number]> = []
@@ -73,6 +81,15 @@ export async function logMatch(formData: FormData) {
   const elo = applyGames(a.currentElo, b.currentElo, parsed.data.sets)
   const winnerId = winner === 'A' ? a.id : winner === 'B' ? b.id : null
 
+  const activeElos = await db
+    .select({ id: players.id, currentElo: players.currentElo })
+    .from(players)
+    .where(eq(players.active, true))
+  const beforePool = activeElos.map((p) => p.currentElo)
+  const afterPool = activeElos.map((p) =>
+    p.id === a.id ? elo.eloA : p.id === b.id ? elo.eloB : p.currentElo
+  )
+
   await db.transaction(async (tx) => {
     await tx.insert(matches).values({
       playerAId: a.id,
@@ -95,7 +112,17 @@ export async function logMatch(formData: FormData) {
   revalidatePath('/players')
   revalidatePath(`/players/${a.id}`)
   revalidatePath(`/players/${b.id}`)
-  return { ok: true }
+  const result: LogResult = {
+    aId: a.id, aName: a.name, bId: b.id, bName: b.name,
+    winnerId,
+    eloABefore: a.currentElo, eloAAfter: elo.eloA,
+    eloBBefore: b.currentElo, eloBAfter: elo.eloB,
+    aRankBefore: rankWithin(beforePool, a.currentElo),
+    aRankAfter: rankWithin(afterPool, elo.eloA),
+    bRankBefore: rankWithin(beforePool, b.currentElo),
+    bRankAfter: rankWithin(afterPool, elo.eloB),
+  }
+  return { ok: true as const, result }
 }
 
 

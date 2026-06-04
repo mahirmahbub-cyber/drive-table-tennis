@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { getMatchDetail, type MatchDetail } from '@/app/actions/matches'
 import { setsWon, inferWinnerSide, playerEloDelta } from '@/lib/match-format'
 import { formatDuration } from '@/lib/stats'
+import { AnimatedDial } from '@/components/animated-dial'
+import { DeltaCounter } from '@/components/motion/delta-counter'
 
 export function MatchDetailModal({
   id, open, onOpenChange,
@@ -93,13 +95,23 @@ export function MatchDetailModal({
               ].map((p) => (
                 <Link key={p.id} href={`/players/${p.id}`}
                   className="flex-1 rounded-lg border border-border p-2.5 transition-colors hover:bg-secondary">
+                  {p.before != null && p.after != null && (
+                    <div className="flex justify-center mb-1">
+                      <AnimatedDial from={p.before} to={p.after} size="sm" durationMs={950} />
+                    </div>
+                  )}
                   <div className="text-sm">{p.name}</div>
                   {p.delta != null && (
                     <>
                       <div className={`font-mono nums font-bold ${p.delta >= 0 ? 'text-gain' : 'text-loss'}`}>
-                        {p.delta >= 0 ? '+' : '−'}{Math.abs(p.delta)}
+                        {p.delta >= 0 ? '+' : '−'}<DeltaCounter from={0} to={Math.abs(p.delta)} durationMs={600} />
                       </div>
-                      <div className="font-mono text-[11px] text-muted-foreground">{p.before} → {p.after}</div>
+                      <div className="font-mono text-[11px] text-muted-foreground">
+                        {p.before} →{' '}
+                        {p.before != null && p.after != null
+                          ? <DeltaCounter from={p.before} to={p.after} durationMs={950} />
+                          : p.after}
+                      </div>
                     </>
                   )}
                 </Link>

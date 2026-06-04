@@ -221,3 +221,10 @@ export function participation(all: EngineMatch[], activePlayerIds: string[], sin
     totalCourtSeconds: court,
   }
 }
+
+/** Competition rank of `elo` within a pool: (number of elos strictly greater) + 1. */
+export function rankWithin(elos: number[], elo: number): number {
+  let above = 0
+  for (const e of elos) if (e > elo) above++
+  return above + 1
+}

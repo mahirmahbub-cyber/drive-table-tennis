@@ -46,7 +46,7 @@ export async function createPlayerSelfServe(formData: FormData) {
 
   revalidatePath('/players')
   revalidatePath('/')
-  redirect(`/players/${created.id}`)
+  redirect(`/players/${created.id}?welcome=1`)
 }
 
 export async function createPlayerAdmin(formData: FormData) {

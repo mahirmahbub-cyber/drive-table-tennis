@@ -15,10 +15,14 @@ export const dynamic = 'force-dynamic'
 
 export default async function PlayerPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ welcome?: string }>
 }) {
   const { id } = await params
+  const sp = await searchParams
+  const welcome = sp.welcome === '1'
   const [player] = await db.select().from(players).where(eq(players.id, id))
   if (!player) notFound()
 
@@ -109,6 +113,15 @@ export default async function PlayerPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 md:px-6">
+
+      {welcome && (
+        <div className="mb-6 rounded-xl border border-primary/40 bg-secondary px-4 py-3.5">
+          <div className="font-display text-sm font-bold text-primary">🏁 You&apos;re on the grid!</div>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Starting at 1200 ELO. <a href="/#log" className="text-primary hover:underline">Log your first game</a> to start climbing.
+          </p>
+        </div>
+      )}
 
       {/* ── Back link ── */}
       <Link

@@ -52,7 +52,7 @@ export function Leaderboard({ players, movers, wlById }: { players: HomePlayer[]
             </AnimatedRow>
           )
         })}
-        {ranked.length === 0 && <li className="px-3 py-4 text-sm text-muted-foreground">No players yet.</li>}
+        {ranked.length === 0 && <li className="px-3 py-4 text-sm text-muted-foreground">The grid is empty — be the first to join.</li>}
       </ol>
     </section>
   )

@@ -6,6 +6,8 @@ import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration, parseDurationInput } from '@/lib/stats'
 import { Stepper } from '@/components/stepper'
 import { inferWinnerSide, setsWon, type SetScore } from '@/lib/match-format'
+import { RaceResult } from '@/components/race-result'
+import type { LogResult } from '@/app/actions/matches'
 
 type PlayerOption = { id: string; name: string; nickname: string | null; currentElo: number }
 
@@ -37,6 +39,7 @@ export function MatchLogForm({
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [savedTick, setSavedTick] = useState(0)
+  const [result, setResult] = useState<LogResult | null>(null)
   const [duration, setDuration] = useState<number>(initial?.durationSeconds ?? 0)
   const [durationText, setDurationText] = useState<string>(
     initial?.durationSeconds ? formatDuration(initial.durationSeconds) : ''
@@ -97,6 +100,7 @@ export function MatchLogForm({
       }
       if (onSuccess) onSuccess()
       if (!isEdit) {
+        if (r && 'result' in r && (r as { result?: LogResult }).result) setResult((r as { result: LogResult }).result)
         setSavedTick((t) => t + 1)
         setDuration(0)
         setDurationText('')
@@ -131,6 +135,18 @@ export function MatchLogForm({
     }
     return { tone: 'win' as const, text: `${winnerName} wins the match (${tally.a}–${tally.b})` }
   })()
+
+  if (!isEdit && result) {
+    return (
+      <RaceResult
+        result={result}
+        onLogAnother={() => {
+          setResult(null)
+          setSavedTick((t) => t + 1)
+        }}
+      />
+    )
+  }
 
   return (
     <form key={savedTick} action={handle} className="space-y-6">
