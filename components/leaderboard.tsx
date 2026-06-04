@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { PlayerAvatar } from './player-avatar'
 import { AnimatedRow } from './motion/animated-row'
+import { TitleBadge } from '@/components/title-badge'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import type { HomePlayer, PlayerWL } from '@/lib/home-data'
 import type { Mover } from '@/lib/stats-engine'
+import type { Title } from '@/lib/titles'
 
-export function Leaderboard({ players, movers, wlById }: { players: HomePlayer[]; movers: Mover[]; wlById: Map<string, PlayerWL> }) {
+export function Leaderboard({ players, movers, wlById, titles }: { players: HomePlayer[]; movers: Mover[]; wlById: Map<string, PlayerWL>; titles?: Map<string, Title> }) {
   const ranked = [...players].sort((a, b) => b.currentElo - a.currentElo).slice(0, 20)
   const leaderElo = ranked[0]?.currentElo ?? 0
   const moveById = new Map(movers.map((m) => [m.playerId, m.delta] as const))
@@ -33,7 +35,11 @@ export function Leaderboard({ players, movers, wlById }: { players: HomePlayer[]
               <Link href={`/players/${p.id}`} className="flex-1 min-w-0 leading-tight transition-colors duration-150 hover:text-primary">
                 <span className="flex items-center gap-2">
                   <span className="truncate text-sm font-medium">{p.name}</span>
-                  {pole && <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-primary">Pole</span>}
+                  {titles?.get(p.id) ? (
+                    <TitleBadge title={titles.get(p.id)!} />
+                  ) : pole ? (
+                    <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-primary">Pole</span>
+                  ) : null}
                 </span>
                 {p.nickname && <span className="block truncate text-xs text-muted-foreground">&ldquo;{p.nickname}&rdquo;</span>}
               </Link>

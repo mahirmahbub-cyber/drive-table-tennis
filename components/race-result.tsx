@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowUp } from 'lucide-react'
 import { AnimatedDial } from '@/components/animated-dial'
+import { mogCaption } from '@/lib/banter'
 import type { LogResult } from '@/app/actions/matches'
 
 function LightsOut({ onDone }: { onDone: () => void }) {
@@ -48,6 +49,14 @@ export function RaceResult({ result, onLogAnother }: { result: LogResult; onLogA
       ) : (
         <div className="space-y-5">
           <div className="font-display text-xs uppercase tracking-widest text-primary">Result</div>
+          {result.winnerId && (
+            <div className="font-display text-sm font-semibold">
+              {mogCaption(
+                result.winnerId === result.aId ? result.aName : result.bName,
+                result.winnerId === result.aId ? result.bName : result.aName,
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             {[
               { name: result.aName, won: aWon, before: result.eloABefore, after: result.eloAAfter, rb: result.aRankBefore, ra: result.aRankAfter },

@@ -228,3 +228,16 @@ export function rankWithin(elos: number[], elo: number): number {
   for (const e of elos) if (e > elo) above++
   return above + 1
 }
+
+/** Count of `playerId`'s wins where the opponent was rated at least `gap` ELO higher (before the match). */
+export function giantKills(all: EngineMatch[], playerId: string, gap = 100): number {
+  let n = 0
+  for (const mt of all) {
+    if (mt.winnerId !== playerId) continue
+    const isA = mt.playerAId === playerId
+    const myBefore = isA ? mt.eloABefore : mt.eloBBefore
+    const oppBefore = isA ? mt.eloBBefore : mt.eloABefore
+    if (oppBefore - myBefore >= gap) n++
+  }
+  return n
+}

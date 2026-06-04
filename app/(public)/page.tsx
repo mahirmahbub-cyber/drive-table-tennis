@@ -8,7 +8,8 @@ import { SuperlativesStrip } from '@/components/home/superlatives-strip'
 import { RivalryWatch } from '@/components/home/rivalry-watch'
 import { ByTheNumbers } from '@/components/home/by-the-numbers'
 import { loadHomeData } from '@/lib/home-data'
-import { movers } from '@/lib/stats-engine'
+import { movers, playerAggregates, giantKills, rankWithin } from '@/lib/stats-engine'
+import { topTitle, type Title } from '@/lib/titles'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,24 @@ export default async function HomePage() {
   const now = Date.now()
   const since = new Date(now - 7 * 86400 * 1000)
   const weekMovers = movers(data.engineMatches, since)
+
+  const allElos = data.activePlayers.map((p) => p.currentElo)
+  const moverById = new Map(weekMovers.map((mv) => [mv.playerId, mv.delta] as const))
+  const titleByPlayer = new Map<string, Title>()
+  for (const p of data.activePlayers) {
+    const agg = playerAggregates(data.engineMatches, p.id, p.currentElo)
+    const t = topTitle({
+      rank: rankWithin(allElos, p.currentElo),
+      totalPlayers: data.activePlayers.length,
+      games: agg.games,
+      currentStreak: agg.currentStreak,
+      weeklyDelta: moverById.get(p.id) ?? 0,
+      giantKills: giantKills(data.engineMatches, p.id),
+      currentElo: p.currentElo,
+      peakElo: agg.peakElo,
+    })
+    if (t) titleByPlayer.set(p.id, t)
+  }
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
@@ -66,7 +85,7 @@ export default async function HomePage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <div className="space-y-8 min-w-0">
           <SuperlativesStrip data={data} now={now} movers={weekMovers} />
-          <Leaderboard players={data.activePlayers} movers={weekMovers} wlById={data.wlById} />
+          <Leaderboard players={data.activePlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
         </div>
         <div className="space-y-8">
           <RivalryWatch data={data} now={now} />

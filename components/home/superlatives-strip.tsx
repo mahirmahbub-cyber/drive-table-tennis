@@ -4,6 +4,7 @@ import type { Mover } from '@/lib/stats-engine'
 import {
   upsetOfWeek, demolitionOfWeek, matchMargin,
 } from '@/lib/stats-engine'
+import { SUPERLATIVE_LABELS } from '@/lib/banter'
 
 const WINDOW_DAYS = 7
 
@@ -17,13 +18,13 @@ export function SuperlativesStrip({ data, now, movers }: { data: HomeData; now: 
 
   const cards = [
     topMover && topMover.delta > 0
-      ? { icon: TrendingUp, label: 'Most Improved', value: name(topMover.playerId), sub: `+${topMover.delta} ELO` }
+      ? { icon: TrendingUp, label: SUPERLATIVE_LABELS.mostImproved, value: name(topMover.playerId), sub: `+${topMover.delta} ELO` }
       : null,
     upset
-      ? { icon: Zap, label: 'Upset of the Week', value: name(upset.winnerId), sub: `beat ${name(upset.winnerId === upset.playerAId ? upset.playerBId : upset.playerAId)}` }
+      ? { icon: Zap, label: SUPERLATIVE_LABELS.upset, value: name(upset.winnerId), sub: `mogged ${name(upset.winnerId === upset.playerAId ? upset.playerBId : upset.playerAId)}` }
       : null,
     demo
-      ? { icon: Flame, label: 'Demolition', value: name(demo.winnerId), sub: `by ${matchMargin(demo)} pts` }
+      ? { icon: Flame, label: SUPERLATIVE_LABELS.demolition, value: name(demo.winnerId), sub: `cooked ${name(demo.winnerId === demo.playerAId ? demo.playerBId : demo.playerAId)} by ${matchMargin(demo)}` }
       : null,
   ].filter(Boolean) as { icon: typeof Trophy; label: string; value: string; sub: string }[]
 

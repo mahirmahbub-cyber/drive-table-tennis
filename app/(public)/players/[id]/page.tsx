@@ -6,7 +6,9 @@ import { PlayerAvatar } from '@/components/player-avatar'
 import { EloChart } from '@/components/elo-chart'
 import { SpeedoGauge } from '@/components/speedo-gauge'
 import { classifyOpponentTier, averageDurationForPlayer, formatDuration, type DurationMatch } from '@/lib/stats'
-import { playerAggregates, type EngineMatch } from '@/lib/stats-engine'
+import { playerAggregates, giantKills, rankWithin, movers, type EngineMatch } from '@/lib/stats-engine'
+import { titlesForPlayer } from '@/lib/titles'
+import { TitleBadge } from '@/components/title-badge'
 import Link from 'next/link'
 import { PlayerGamesHistory, type HistoryRow } from '@/components/player-games-history'
 import { playerEloDelta, type SetScore } from '@/lib/match-format'
@@ -80,6 +82,20 @@ export default async function PlayerPage({
   const losses = stats.losses
   const winPct = stats.winPct
 
+  const now = Date.now()
+  const activeElos = await db.select({ id: players.id, currentElo: players.currentElo }).from(players).where(eq(players.active, true))
+  const weekly = movers(engineMatches, new Date(now - 7 * 86400 * 1000)).find((x) => x.playerId === id)?.delta ?? 0
+  const titles = titlesForPlayer({
+    rank: rankWithin(activeElos.map((p) => p.currentElo), player.currentElo),
+    totalPlayers: activeElos.length,
+    games: stats.games,
+    currentStreak: stats.currentStreak,
+    weeklyDelta: weekly,
+    giantKills: giantKills(engineMatches, id),
+    currentElo: player.currentElo,
+    peakElo: stats.peakElo,
+  })
+
   const tier = {
     higher: { w: 0, l: 0 },
     similar: { w: 0, l: 0 },
@@ -146,6 +162,13 @@ export default async function PlayerPage({
             </h1>
             {player.bio && (
               <p className="mt-1 text-sm text-muted-foreground">{player.bio}</p>
+            )}
+
+            {/* Title badges */}
+            {titles.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {titles.map((t) => <TitleBadge key={t.key} title={t} />)}
+              </div>
             )}
 
             {/* Key stats row */}

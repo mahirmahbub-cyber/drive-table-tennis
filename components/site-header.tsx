@@ -11,6 +11,7 @@ import { logout } from '@/app/actions/auth'
 const NAV = [
   { href: '/players', label: 'Players' },
   { href: '/matches', label: 'Matches' },
+  { href: '/matrix', label: 'Mogboard' },
   { href: '/tournaments', label: 'Tournaments' },
 ]
 
