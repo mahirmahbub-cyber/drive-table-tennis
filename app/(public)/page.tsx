@@ -7,6 +7,7 @@ import { JoinCta } from '@/components/join-cta'
 import { SuperlativesStrip } from '@/components/home/superlatives-strip'
 import { RivalryWatch } from '@/components/home/rivalry-watch'
 import { ByTheNumbers } from '@/components/home/by-the-numbers'
+import { H2hBanner } from '@/components/home/h2h-banner'
 import { loadHomeData } from '@/lib/home-data'
 import { movers, playerAggregates, giantKills, rankWithin } from '@/lib/stats-engine'
 import { topTitle, type Title } from '@/lib/titles'
@@ -39,6 +40,7 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
+      <H2hBanner />
       {/* ── Hero ── */}
       <section className="mb-10 overflow-hidden rounded-xl border border-border bg-linear-to-br from-secondary to-card">
         <div className="grid items-center gap-6 p-6 md:grid-cols-[1fr_1.1fr] md:p-8">

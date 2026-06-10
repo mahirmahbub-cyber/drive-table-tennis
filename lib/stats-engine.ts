@@ -241,3 +241,88 @@ export function giantKills(all: EngineMatch[], playerId: string, gap = 100): num
   }
   return n
 }
+
+// ── Head-to-head detail ───────────────────────────────────────────────────────
+
+export type H2HMatchResult = 'W' | 'L'
+
+export type EloSwingPoint = {
+  matchIndex: number
+  date: string
+  cumulativeDelta: number
+  matchDelta: number
+}
+
+export type H2HDetail = {
+  p1Id: string
+  p2Id: string
+  matchCount: number
+  p1MatchWins: number
+  p2MatchWins: number
+  p1GameWins: number
+  p2GameWins: number
+  avgDurationSeconds: number | null
+  avgScoreDifferential: number | null
+  last5Form: H2HMatchResult[]
+  totalEloTakenByP1: number
+  totalEloTakenByP2: number
+  eloSwingSeries: EloSwingPoint[]
+}
+
+export function headToHeadDetail(all: EngineMatch[], p1: string, p2: string): H2HDetail {
+  const pairMatches = all
+    .filter((m) => {
+      const ids = [m.playerAId, m.playerBId]
+      return ids.includes(p1) && ids.includes(p2)
+    })
+    .sort((a, b) => a.playedAt.getTime() - b.playedAt.getTime())
+
+  let p1MatchWins = 0, p2MatchWins = 0, p1GameWins = 0, p2GameWins = 0
+  let durSum = 0, durCount = 0, marginSum = 0, gameCount = 0
+  let totalEloTakenByP1 = 0, totalEloTakenByP2 = 0, cumulativeDelta = 0
+  const formAll: H2HMatchResult[] = []
+  const eloSwingSeries: EloSwingPoint[] = []
+
+  for (let i = 0; i < pairMatches.length; i++) {
+    const m = pairMatches[i]
+    const p1IsA = m.playerAId === p1
+
+    let p1Games = 0, p2Games = 0
+    for (const [sa, sb] of m.setScores) {
+      marginSum += Math.abs(sa - sb)
+      gameCount++
+      if (sa === sb) continue
+      const p1Won = p1IsA ? sa > sb : sb > sa
+      if (p1Won) { p1GameWins++; p1Games++ } else { p2GameWins++; p2Games++ }
+    }
+
+    if (p1Games > p2Games) { p1MatchWins++; formAll.push('W') }
+    else if (p2Games > p1Games) { p2MatchWins++; formAll.push('L') }
+
+    if (m.durationSeconds !== null && m.durationSeconds > 0) { durSum += m.durationSeconds; durCount++ }
+
+    const p1Delta = p1IsA ? m.eloAAfter - m.eloABefore : m.eloBAfter - m.eloBBefore
+    const p2Delta = p1IsA ? m.eloBAfter - m.eloBBefore : m.eloAAfter - m.eloABefore
+    totalEloTakenByP1 += p1Delta
+    totalEloTakenByP2 += p2Delta
+    cumulativeDelta += p1Delta
+    eloSwingSeries.push({
+      matchIndex: i + 1,
+      date: `${m.playedAt.getDate()} ${m.playedAt.toLocaleString('en', { month: 'short' })}`,
+      cumulativeDelta,
+      matchDelta: p1Delta,
+    })
+  }
+
+  return {
+    p1Id: p1, p2Id: p2,
+    matchCount: pairMatches.length,
+    p1MatchWins, p2MatchWins, p1GameWins, p2GameWins,
+    avgDurationSeconds: durCount > 0 ? Math.round(durSum / durCount) : null,
+    avgScoreDifferential: gameCount > 0 ? Math.round((marginSum / gameCount) * 10) / 10 : null,
+    last5Form: formAll.slice(-5),
+    totalEloTakenByP1: Math.round(totalEloTakenByP1),
+    totalEloTakenByP2: Math.round(totalEloTakenByP2),
+    eloSwingSeries,
+  }
+}
