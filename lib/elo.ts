@@ -47,3 +47,92 @@ export function applyGames(
   }
   return { eloA: a, eloB: b, deltaA: a - eloA, deltaB: b - eloB }
 }
+
+export type ProjectionStep = {
+  game: number // 1-based index in the played sequence
+  winner: 'A' | 'B'
+  eloA: number // running rating after this game
+  eloB: number
+}
+
+export type Projection = {
+  eloABefore: number
+  eloBBefore: number
+  eloAAfter: number
+  eloBAfter: number
+  deltaA: number
+  deltaB: number
+  steps: ProjectionStep[]
+}
+
+/**
+ * Builds an evenly-interleaved win sequence from games-won counts. Each player's
+ * wins are spread across the sequence proportionally; ties for a slot go to
+ * whoever has placed fewer wins so far, then to A. Deterministic. Assumes
+ * non-negative counts.
+ */
+function buildSequence(gamesWonA: number, gamesWonB: number): Array<'A' | 'B'> {
+  const total = gamesWonA + gamesWonB
+  const seq: Array<'A' | 'B'> = []
+  let usedA = 0
+  let usedB = 0
+  for (let i = 0; i < total; i++) {
+    if (usedA >= gamesWonA) {
+      seq.push('B')
+      usedB++
+      continue
+    }
+    if (usedB >= gamesWonB) {
+      seq.push('A')
+      usedA++
+      continue
+    }
+    const placed = i + 1
+    const deficitA = (gamesWonA * placed) / total - usedA
+    const deficitB = (gamesWonB * placed) / total - usedB
+    let pickA: boolean
+    if (Math.abs(deficitA - deficitB) > 1e-9) pickA = deficitA > deficitB
+    else if (usedA !== usedB) pickA = usedA < usedB
+    else pickA = true
+    if (pickA) {
+      seq.push('A')
+      usedA++
+    } else {
+      seq.push('B')
+      usedB++
+    }
+  }
+  return seq
+}
+
+/**
+ * Projects the Elo change of a hypothetical sitting from games-won counts, with
+ * no point scores (margins never affect Elo). Threads each game through
+ * applyMatch in the evenly-interleaved order and records the running ratings.
+ */
+export function projectGamesWon(
+  eloA: number,
+  eloB: number,
+  gamesWonA: number,
+  gamesWonB: number
+): Projection {
+  const sequence = buildSequence(gamesWonA, gamesWonB)
+  let a = eloA
+  let b = eloB
+  const steps: ProjectionStep[] = []
+  for (const [i, winner] of sequence.entries()) {
+    const r = applyMatch(a, b, winner)
+    a = r.eloA
+    b = r.eloB
+    steps.push({ game: i + 1, winner, eloA: a, eloB: b })
+  }
+  return {
+    eloABefore: eloA,
+    eloBBefore: eloB,
+    eloAAfter: a,
+    eloBAfter: b,
+    deltaA: a - eloA,
+    deltaB: b - eloB,
+    steps,
+  }
+}
