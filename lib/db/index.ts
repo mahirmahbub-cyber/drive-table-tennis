@@ -8,10 +8,12 @@ const pool =
   globalForDb.pool ??
   new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 10,
+    // Serverless: each warm instance holds at most one client connection.
+    // The Supabase transaction pooler (port 6543) multiplexes these across its server pool.
+    max: 1,
   })
 
-if (process.env.NODE_ENV !== 'production') globalForDb.pool = pool
+globalForDb.pool = pool
 
 export const db = drizzle(pool, { schema })
 export * from './schema'
