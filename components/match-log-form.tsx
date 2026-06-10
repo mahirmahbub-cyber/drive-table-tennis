@@ -211,37 +211,41 @@ export function MatchLogForm({
           {mode === 'quick' ? 'Score' : 'Games'}
         </legend>
         {Array.from({ length: mode === 'quick' ? 1 : setCount }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
+          <div key={i} className="space-y-1.5">
             {mode === 'full' && (
-              <span className="w-12 font-mono text-xs text-muted-foreground">Game {i + 1}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-muted-foreground">Game {i + 1}</span>
+                {setCount > 1 && i === setCount - 1 && (
+                  <button
+                    type="button"
+                    aria-label={`remove game ${i + 1}`}
+                    onClick={() => setSetCount((c) => Math.max(1, c - 1))}
+                    className="shrink-0 px-1 text-muted-foreground hover:text-loss"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             )}
-            <Stepper
-              name={`set_${i}_a`}
-              ariaLabel={`game ${i + 1} player A`}
-              defaultValue={scores[i][0] === '' ? '' : Number(scores[i][0])}
-              onValueChange={(v) =>
-                setScores((s) => { const n = [...s]; n[i] = [v === '' ? '' : String(v), n[i][1]]; return n })
-              }
-            />
-            <span className="text-muted-foreground">–</span>
-            <Stepper
-              name={`set_${i}_b`}
-              ariaLabel={`game ${i + 1} player B`}
-              defaultValue={scores[i][1] === '' ? '' : Number(scores[i][1])}
-              onValueChange={(v) =>
-                setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
-              }
-            />
-            {mode === 'full' && setCount > 1 && i === setCount - 1 && (
-              <button
-                type="button"
-                aria-label={`remove game ${i + 1}`}
-                onClick={() => setSetCount((c) => Math.max(1, c - 1))}
-                className="text-muted-foreground hover:text-loss"
-              >
-                ×
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              <Stepper
+                name={`set_${i}_a`}
+                ariaLabel={`game ${i + 1} player A`}
+                defaultValue={scores[i][0] === '' ? '' : Number(scores[i][0])}
+                onValueChange={(v) =>
+                  setScores((s) => { const n = [...s]; n[i] = [v === '' ? '' : String(v), n[i][1]]; return n })
+                }
+              />
+              <span className="text-muted-foreground">–</span>
+              <Stepper
+                name={`set_${i}_b`}
+                ariaLabel={`game ${i + 1} player B`}
+                defaultValue={scores[i][1] === '' ? '' : Number(scores[i][1])}
+                onValueChange={(v) =>
+                  setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
+                }
+              />
+            </div>
           </div>
         ))}
         {mode === 'full' && setCount < 7 && (

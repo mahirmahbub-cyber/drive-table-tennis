@@ -33,12 +33,12 @@ export function Stepper({
     update(clamp((typeof value === 'number' ? value : 0) + delta))
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-input bg-card p-1.5">
+    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-input bg-card p-1.5">
       <button
         type="button"
         aria-label={`decrease ${ariaLabel ?? name}`}
         onClick={() => step(-1)}
-        className="flex h-8 w-8 items-center justify-center rounded-md bg-secondary text-foreground transition-colors hover:bg-muted"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground transition-colors hover:bg-muted"
       >
         −
       </button>
@@ -55,13 +55,13 @@ export function Stepper({
           if (raw === '') return update('')
           update(clamp(Number(raw)))
         }}
-        className="w-12 bg-transparent text-center font-mono nums text-xl font-bold focus:outline-none"
+        className="w-12 min-w-0 bg-transparent text-center font-mono nums text-xl font-bold focus:outline-none"
       />
       <button
         type="button"
         aria-label={`increase ${ariaLabel ?? name}`}
         onClick={() => step(1)}
-        className="flex h-8 w-8 items-center justify-center rounded-md bg-secondary text-foreground transition-colors hover:bg-muted"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary text-foreground transition-colors hover:bg-muted"
       >
         +
       </button>
