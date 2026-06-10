@@ -13,6 +13,7 @@ const NAV = [
   { href: '/matches', label: 'Matches' },
   { href: '/matrix', label: 'Mogboard' },
   { href: '/tournaments', label: 'Tournaments' },
+  { href: '/calculator', label: 'Calculator' },
 ]
 
 function LogoMark() {
