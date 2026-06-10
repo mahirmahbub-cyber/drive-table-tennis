@@ -98,7 +98,7 @@ export default async function MatchesPage() {
 
               {/* Matchup + scores scroll horizontally when they overflow; date/duration and View game stay pinned */}
               <div className="min-w-0 flex-1 overflow-x-auto">
-                <div className="flex w-max min-w-full items-center gap-3">
+                <div className="flex w-max min-w-full items-center gap-1">
                   {aWon ? (
                     <span className="w-5 shrink-0 text-center leading-none" aria-hidden>
                       👑
@@ -106,11 +106,10 @@ export default async function MatchesPage() {
                   ) : null}
                   <Link
                     href={`/players/${r.aId}`}
-                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${
-                      aWon
-                        ? 'font-semibold text-foreground hover:text-primary'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${aWon
+                      ? 'font-semibold text-foreground hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     {r.aName}
                   </Link>
@@ -123,11 +122,10 @@ export default async function MatchesPage() {
                   )}
                   <Link
                     href={`/players/${r.bId}`}
-                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${
-                      bWon
-                        ? 'font-semibold text-foreground hover:text-primary'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${bWon
+                      ? 'font-semibold text-foreground hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     {r.bName}
                   </Link>

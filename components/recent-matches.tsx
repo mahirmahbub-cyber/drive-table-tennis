@@ -40,7 +40,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
             >
               {/* Matchup + scores scroll horizontally when they overflow; View game stays pinned */}
               <div className="min-w-0 flex-1 overflow-x-auto">
-                <div className="flex w-max min-w-full items-center gap-3">
+                <div className="flex w-max min-w-full items-center gap-1">
                   {aWon ? <span className="w-5 shrink-0 text-center leading-none" aria-hidden>
                     👑
                   </span> : <></>}
