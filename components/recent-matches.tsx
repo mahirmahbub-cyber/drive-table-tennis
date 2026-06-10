@@ -34,44 +34,49 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
           const bWon = r.winnerId === r.bId
           const sets = (r.setScores as Array<[number, number]>) ?? []
           return (
-            <li key={r.id} className="data-row text-sm">
-              {/* Winner indicator */}
-              <span
-                className={`w-1 h-4 rounded-full shrink-0 ${aWon ? 'bg-gain' : 'bg-transparent'}`}
-              />
-              <Link
-                href={`/players/${r.aId}`}
-                className={`shrink-0 transition-colors duration-150 ${
-                  aWon
-                    ? 'font-semibold text-foreground hover:text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {r.aName}
-              </Link>
+            <li
+              key={r.id}
+              className="flex items-center gap-3 border-b border-border px-3 py-1.5 text-sm last:border-0"
+            >
+              {/* Matchup + scores scroll horizontally when they overflow; View game stays pinned */}
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <div className="flex w-max min-w-full items-center gap-3">
+                  {aWon ? <span className="w-5 shrink-0 text-center leading-none" aria-hidden>
+                    👑
+                  </span> : <></>}
 
-              {/* Scores */}
-              {sets.length > 0 ? (
-                <span className="flex-1 text-center font-mono nums text-xs text-muted-foreground tracking-tight">
-                  {sets.map(([sa, sb]) => `${sa}–${sb}`).join('  ')}
-                </span>
-              ) : (
-                <span className="flex-1" />
-              )}
 
-              <Link
-                href={`/players/${r.bId}`}
-                className={`shrink-0 transition-colors duration-150 ${
-                  bWon
-                    ? 'font-semibold text-foreground hover:text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {r.bName}
-              </Link>
-              <span
-                className={`w-1 h-4 rounded-full shrink-0 ${bWon ? 'bg-gain' : 'bg-transparent'}`}
-              />
+                  <Link
+                    href={`/players/${r.aId}`}
+                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${aWon
+                      ? 'font-semibold text-foreground hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    {r.aName}
+                  </Link>
+                  {sets.length > 0 ? (
+                    <span className="flex-1 whitespace-nowrap text-center font-mono text-xs nums tracking-tight text-muted-foreground">
+                      {sets.map(([sa, sb]) => `${sa}–${sb}`).join('  ')}
+                    </span>
+                  ) : (
+                    <span className="flex-1" />
+                  )}
+                  <Link
+                    href={`/players/${r.bId}`}
+                    className={`shrink-0 whitespace-nowrap transition-colors duration-150 ${bWon
+                      ? 'font-semibold text-foreground hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    {r.bName}
+                  </Link>
+                  {bWon ? <span className="w-5 shrink-0 text-center leading-none" aria-hidden>
+                    👑
+                  </span> : <></>}
+
+                </div>
+              </div>
               <ViewGameButton id={r.id} />
             </li>
           )

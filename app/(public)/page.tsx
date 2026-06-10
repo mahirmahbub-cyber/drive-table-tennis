@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const data = await loadHomeData()
-  const now = Date.now()
+  const now = data.now
   const since = new Date(now - 7 * 86400 * 1000)
   const weekMovers = movers(data.engineMatches, since)
 
@@ -40,7 +40,7 @@ export default async function HomePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
       {/* ── Hero ── */}
-      <section className="mb-10 overflow-hidden rounded-xl border border-border bg-gradient-to-br from-secondary to-card">
+      <section className="mb-10 overflow-hidden rounded-xl border border-border bg-linear-to-br from-secondary to-card">
         <div className="grid items-center gap-6 p-6 md:grid-cols-[1fr_1.1fr] md:p-8">
           <div>
             <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-2">
@@ -86,12 +86,12 @@ export default async function HomePage() {
         <div className="space-y-8 min-w-0">
           <SuperlativesStrip data={data} now={now} movers={weekMovers} />
           <Leaderboard players={data.activePlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
-        </div>
-        <div className="space-y-8">
-          <RivalryWatch data={data} now={now} />
-          <ByTheNumbers data={data} now={now} />
-          <JoinCta />
           <RecentMatches />
+        </div>
+        <div className="space-y-8 min-w-0">
+          <ByTheNumbers data={data} now={now} />
+          <RivalryWatch data={data} now={now} />
+          <JoinCta />
         </div>
       </div>
     </main>

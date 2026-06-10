@@ -42,7 +42,7 @@ export async function loadHomeData() {
       return [p.id, { wins: s.wins, losses: s.losses, games: s.games }] as const
     })
   )
-  return { activePlayers, engineMatches, nameById, wlById }
+  return { now: Date.now(), activePlayers, engineMatches, nameById, wlById }
 }
 
 export type HomeData = Awaited<ReturnType<typeof loadHomeData>>

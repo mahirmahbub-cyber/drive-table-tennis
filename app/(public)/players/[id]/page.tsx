@@ -12,6 +12,7 @@ import { TitleBadge } from '@/components/title-badge'
 import Link from 'next/link'
 import { PlayerGamesHistory, type HistoryRow } from '@/components/player-games-history'
 import { playerEloDelta, type SetScore } from '@/lib/match-format'
+import { requestNow } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,7 +83,7 @@ export default async function PlayerPage({
   const losses = stats.losses
   const winPct = stats.winPct
 
-  const now = Date.now()
+  const now = requestNow()
   const activeElos = await db.select({ id: players.id, currentElo: players.currentElo }).from(players).where(eq(players.active, true))
   const weekly = movers(engineMatches, new Date(now - 7 * 86400 * 1000)).find((x) => x.playerId === id)?.delta ?? 0
   const titles = titlesForPlayer({
@@ -134,7 +135,7 @@ export default async function PlayerPage({
         <div className="mb-6 rounded-xl border border-primary/40 bg-secondary px-4 py-3.5">
           <div className="font-display text-sm font-bold text-primary">🏁 You&apos;re on the grid!</div>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Starting at 1200 ELO. <a href="/#log" className="text-primary hover:underline">Log your first game</a> to start climbing.
+            Starting at 1200 ELO. <Link href="/#log" className="text-primary hover:underline">Log your first game</Link> to start climbing.
           </p>
         </div>
       )}

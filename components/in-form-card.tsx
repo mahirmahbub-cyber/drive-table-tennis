@@ -8,6 +8,7 @@ import {
 } from '@/lib/stats'
 import { PlayerAvatar } from './player-avatar'
 import { DeltaCounter } from './motion/delta-counter'
+import { requestNow } from '@/lib/utils'
 
 async function loadScoredMatches(since: Date): Promise<Map<string, ScoredMatch[]>> {
   const rows = await db
@@ -45,7 +46,7 @@ async function loadScoredMatches(since: Date): Promise<Map<string, ScoredMatch[]
 }
 
 export async function InFormCard({ windowDays = 14 }: { windowDays?: number }) {
-  const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000)
+  const since = new Date(requestNow() - windowDays * 24 * 60 * 60 * 1000)
   const active = await db
     .select()
     .from(players)
