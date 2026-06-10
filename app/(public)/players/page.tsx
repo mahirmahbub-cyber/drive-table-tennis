@@ -46,10 +46,10 @@ export default async function PlayersPage() {
 
       <ul className="grid gap-3 sm:grid-cols-2">
         {roster.map((p) => (
-          <li key={p.id}>
+          <li key={p.id} className="min-w-0">
             <Link
               href={`/players/${p.id}`}
-              className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors duration-150 hover:border-primary/40 hover:bg-secondary/40"
+              className="group flex min-w-0 items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors duration-150 hover:border-primary/40 hover:bg-secondary/40"
             >
               <PlayerAvatar name={p.name} photoUrl={p.photoUrl} size={44} />
               <div className="min-w-0 flex-1">
