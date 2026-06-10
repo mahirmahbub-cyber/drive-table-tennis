@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { MatchStopwatch } from '@/components/match-stopwatch'
-import { formatDuration, parseDurationInput } from '@/lib/stats'
+import { formatDuration } from '@/lib/stats'
 import { Stepper } from '@/components/stepper'
 import { inferWinnerSide, setsWon, type SetScore } from '@/lib/match-format'
 import { RaceResult } from '@/components/race-result'
@@ -79,10 +79,19 @@ export function MatchLogForm({
   }, [])
 
   function handleDurationText(text: string) {
-    setDurationText(text)
-    const parsed = parseDurationInput(text)
-    if (parsed !== null) setDuration(parsed)
-    if (text.trim() === '') setDuration(0)
+    // Strip to digits and read from the right as mm:ss — the numeric keypad
+    // has no colon on Android, so we insert it. Leading zeros dropped so the
+    // field can be cleared.
+    const digits = text.replace(/\D/g, '').replace(/^0+/, '').slice(0, 6)
+    if (digits === '') {
+      setDurationText('')
+      setDuration(0)
+      return
+    }
+    const n = parseInt(digits, 10)
+    const total = Math.floor(n / 100) * 60 + (n % 100)
+    setDuration(total)
+    setDurationText(formatDuration(total))
   }
 
   async function handle(formData: FormData) {

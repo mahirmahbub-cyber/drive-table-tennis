@@ -17,10 +17,10 @@ export function Leaderboard({ players, movers, wlById, titles }: { players: Home
       <div className="section-header font-display flex items-center justify-between">
         <span>Starting Grid</span>
         <span className="flex items-center gap-4 normal-case tracking-normal text-[10px] text-muted-foreground/70">
-          <span className="w-14 text-right">W–L</span>
-          <span className="w-12 text-right">7d</span>
+          <span className="hidden w-14 text-right sm:block">W–L</span>
+          <span className="hidden w-12 text-right sm:block">7d</span>
           <span className="w-10 text-right">Rating</span>
-          <span className="w-12 text-right">Gap</span>
+          <span className="hidden w-12 text-right sm:block">Gap</span>
         </span>
       </div>
       <ol className="rounded-lg border border-border overflow-hidden bg-card">
@@ -44,17 +44,17 @@ export function Leaderboard({ players, movers, wlById, titles }: { players: Home
                 {p.nickname && <span className="block truncate text-xs text-muted-foreground">&ldquo;{p.nickname}&rdquo;</span>}
               </Link>
               {(() => { const wl = wlById.get(p.id); return (
-                <span className="w-14 shrink-0 text-right font-mono text-xs nums text-muted-foreground">
+                <span className="hidden w-14 shrink-0 text-right font-mono text-xs nums text-muted-foreground sm:block">
                   {wl ? `${wl.wins}–${wl.losses}` : '—'}
                 </span>
               ) })()}
-              <span className={`flex w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-xs nums ${mv > 0 ? 'text-gain' : mv < 0 ? 'text-loss' : 'text-muted-foreground/50'}`}>
+              <span className={`hidden w-12 shrink-0 items-center justify-end gap-0.5 font-mono text-xs nums sm:flex ${mv > 0 ? 'text-gain' : mv < 0 ? 'text-loss' : 'text-muted-foreground/50'}`}>
                 {mv > 0 && <ArrowUp className="h-3 w-3" />}
                 {mv < 0 && <ArrowDown className="h-3 w-3" />}
                 {mv !== 0 ? Math.abs(mv) : '·'}
               </span>
               <span className="w-10 shrink-0 text-right font-display text-base font-semibold nums">{p.currentElo}</span>
-              <span className="w-12 shrink-0 text-right font-mono text-xs nums text-muted-foreground">{pole ? '—' : `-${gap}`}</span>
+              <span className="hidden w-12 shrink-0 text-right font-mono text-xs nums text-muted-foreground sm:block">{pole ? '—' : `-${gap}`}</span>
             </AnimatedRow>
           )
         })}

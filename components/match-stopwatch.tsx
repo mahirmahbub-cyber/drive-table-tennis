@@ -26,6 +26,13 @@ export function MatchStopwatch({
     return () => clearInterval(id)
   }, [running, onChange])
 
+  // Auto-start on mount — the component only mounts when the logger opens.
+  useEffect(() => {
+    startedAt.current = Date.now()
+    setRunning(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function toggle() {
     if (running) {
       setRunning(false)

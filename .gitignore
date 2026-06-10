@@ -42,3 +42,5 @@ next-env.d.ts
 
 # Brainstorming visual-companion artifacts
 .superpowers/
+supabase/.branches
+supabase/.temp
