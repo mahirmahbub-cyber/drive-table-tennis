@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -41,10 +41,13 @@ function isActive(pathname: string, href: string) {
 export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [menuPathname, setMenuPathname] = useState(pathname)
 
-  useEffect(() => {
+  // Close the mobile menu when navigation changes the route — adjust during render, not in an effect.
+  if (pathname !== menuPathname) {
+    setMenuPathname(pathname)
     setMenuOpen(false)
-  }, [pathname])
+  }
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">

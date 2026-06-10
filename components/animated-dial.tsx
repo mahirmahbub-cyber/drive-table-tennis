@@ -27,8 +27,8 @@ export function AnimatedDial({
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(to)
-      return
+      const id = requestAnimationFrame(() => setValue(to))
+      return () => cancelAnimationFrame(id)
     }
     let raf = 0
     let startTs = 0
