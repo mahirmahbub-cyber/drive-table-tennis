@@ -14,6 +14,7 @@ const NAV = [
   { href: '/matrix', label: 'Mogboard' },
   { href: '/tournaments', label: 'Tournaments' },
   { href: '/calculator', label: 'Calculator' },
+  { href: '/seeder', label: 'Seeder' },
 ]
 
 function LogoMark() {
