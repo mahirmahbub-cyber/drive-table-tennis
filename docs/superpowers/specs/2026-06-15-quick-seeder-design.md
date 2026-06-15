@@ -102,7 +102,12 @@ then emit `G - played.length` pending matchups:
 2. **Eligible opponents** = roster minus the picked player, minus anyone in the immediately
    previous matchup (back-to-back avoidance), minus a repeat of the exact previous pairing.
    These exclusions relax one at a time only if no candidate remains (small rosters).
-3. **Choose opponent:**
+3. **Round-robin rotation:** within the fewest-games coverage tier, restrict candidates
+   to those the picked player has faced the **fewest** times (pair counts tracked across
+   the session, seeded from history). So everyone plays everyone before a pairing repeats —
+   within the ±1 game-balance tier (when balance and rotation conflict near a round
+   boundary, balance wins, so an occasional early repeat can appear).
+4. **Choose opponent (ELO weight):**
    - With probability derived from `mix`, pick a deliberate **upset** — weight candidates by
      ELO *distance* (favour far opponents).
    - Otherwise pick a **competitive** match — weight candidates by ELO *closeness*.

@@ -150,3 +150,39 @@ describe('buildMatchups', () => {
     expect(q.every((m) => m.id !== 'h0' && m.id !== 'h1')).toBe(true)
   })
 })
+
+describe('buildMatchups round-robin rotation', () => {
+  const pairKeyOf = (m: { aId: string; bId: string }) =>
+    [m.aId, m.bId].sort().join('|')
+
+  it('plays a full single round-robin with no repeats (4 players, 6 games)', () => {
+    // C(4,2) = 6 unique pairs; 6 games × 2 = 12 slots / 4 = 3 games each = one full RR
+    const q = buildMatchups({ players: roster(4), config: cfg(), count: 6 })
+    const distinct = new Set(q.map(pairKeyOf))
+    expect(distinct.size).toBe(6)
+  })
+
+  it('plays a full single round-robin with no repeats (5 players, 10 games)', () => {
+    // C(5,2) = 10 unique pairs; 10 games × 2 = 20 slots / 5 = 4 games each = one full RR
+    const q = buildMatchups({ players: roster(5), config: cfg(), count: 10 })
+    const distinct = new Set(q.map(pairKeyOf))
+    expect(distinct.size).toBe(10)
+  })
+
+  it('only starts rematches after the first round-robin completes (4 players, 12 games)', () => {
+    // Two full round-robins: each of the 6 pairs should appear exactly twice
+    const q = buildMatchups({ players: roster(4), config: cfg(), count: 12 })
+    const tally = new Map<string, number>()
+    for (const m of q) tally.set(pairKeyOf(m), (tally.get(pairKeyOf(m)) ?? 0) + 1)
+    expect([...tally.values()].every((n) => n === 2)).toBe(true)
+    expect(tally.size).toBe(6)
+  })
+
+  it('seeds pair history so the tail does not repeat an already-played pairing prematurely', () => {
+    const players = roster(4)
+    const first = buildMatchups({ players, config: cfg(), count: 3 })
+    const tail = buildMatchups({ players, config: cfg(), history: first, count: 3 })
+    const distinct = new Set([...first, ...tail].map(pairKeyOf))
+    expect(distinct.size).toBe(6) // 6 games total, still one clean round-robin across the split
+  })
+})

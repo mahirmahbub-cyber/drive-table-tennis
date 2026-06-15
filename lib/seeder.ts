@@ -92,6 +92,10 @@ function inMatchup(m: Matchup | null, id: string): boolean {
   return !!m && (m.aId === id || m.bId === id)
 }
 
+function pairKey(a: string, b: string): string {
+  return a < b ? `${a}|${b}` : `${b}|${a}`
+}
+
 /**
  * Emit exactly `count` new pending matchups for a single-table session.
  *
@@ -100,6 +104,9 @@ function inMatchup(m: Matchup | null, id: string): boolean {
  *    in the immediately previous matchup when avoidable.
  *  - The opponent is drawn from the fewest-games eligible tier (coverage), then
  *    ELO-weighted within it (close by default; far on an `mix`-probability upset).
+ *  - Opponents rotate round-robin within each coverage tier — a pair won't rematch
+ *    until the picked player has faced all others in that fewest-games tier an equal
+ *    number of times (so over a full session everyone plays everyone before repeats).
  *  - PRNG-seeded → fully deterministic for a given (players, config, history).
  */
 export function buildMatchups(input: {
@@ -114,29 +121,47 @@ export function buildMatchups(input: {
 
   const rng = mulberry32(config.seed)
   const games = new Map(players.map((p) => [p.id, 0]))
+  const pairs = new Map<string, number>()
   for (const m of history) {
     if (games.has(m.aId)) games.set(m.aId, (games.get(m.aId) ?? 0) + 1)
     if (games.has(m.bId)) games.set(m.bId, (games.get(m.bId) ?? 0) + 1)
+    pairs.set(pairKey(m.aId, m.bId), (pairs.get(pairKey(m.aId, m.bId)) ?? 0) + 1)
   }
   let last: Matchup | null = history.length ? history[history.length - 1] : null
 
+  /** Returns the round-robin opponent tier for a candidate picker against a given last matchup. */
+  const rrOppTier = (candidateId: string, lastM: Matchup | null): PlayerRef[] => {
+    const allOpp = players.filter((p) => p.id !== candidateId)
+    const minGamesOpp = Math.min(...allOpp.map((p) => games.get(p.id) ?? 0))
+    const tier = allOpp.filter((p) => (games.get(p.id) ?? 0) === minGamesOpp)
+    const minPair = Math.min(...tier.map((p) => pairs.get(pairKey(candidateId, p.id)) ?? 0))
+    return tier.filter((p) => (pairs.get(pairKey(candidateId, p.id)) ?? 0) === minPair && !inMatchup(lastM, p.id))
+  }
+
   const out: Matchup[] = []
   for (let i = 0; i < input.count; i++) {
-    // 1. Picked = fewest games; prefer those not in the previous matchup.
+    // 1. Picked = fewest games; prefer not in the previous matchup; then prefer those
+    //    who have at least one fresh (non-back-to-back) round-robin opponent available.
     const minGames = Math.min(...players.map((p) => games.get(p.id) ?? 0))
     const minPool = players.filter((p) => (games.get(p.id) ?? 0) === minGames)
     const freshPool = minPool.filter((p) => !inMatchup(last, p.id))
     const pickPool = freshPool.length ? freshPool : minPool
-    const picked = pickPool[Math.floor(rng() * pickPool.length)]
+    const bbAwarePool = pickPool.filter((p) => rrOppTier(p.id, last).length > 0)
+    const finalPickPool = bbAwarePool.length ? bbAwarePool : pickPool
+    const picked = finalPickPool[Math.floor(rng() * finalPickPool.length)]
 
-    // 2. Coverage: fewest-games tier across all non-picked players.
+    // 2. Coverage first: fewest-games tier across all non-picked players (preserves ±1).
     const allOpp = players.filter((p) => p.id !== picked.id)
-    const minElig = Math.min(...allOpp.map((p) => games.get(p.id) ?? 0))
-    const tier = allOpp.filter((p) => (games.get(p.id) ?? 0) === minElig)
+    const minGamesOpp = Math.min(...allOpp.map((p) => games.get(p.id) ?? 0))
+    const tier = allOpp.filter((p) => (games.get(p.id) ?? 0) === minGamesOpp)
 
-    // 3. Within tier, prefer those not in previous matchup (relax if none available).
-    const freshTier = tier.filter((p) => !inMatchup(last, p.id))
-    const oppPool = freshTier.length ? freshTier : tier
+    // 3. Round-robin: within the tier, prefer opponents the picked player has faced least.
+    const minPair = Math.min(...tier.map((p) => pairs.get(pairKey(picked.id, p.id)) ?? 0))
+    const rrTier = tier.filter((p) => (pairs.get(pairKey(picked.id, p.id)) ?? 0) === minPair)
+
+    // 4. Within those, prefer not in the previous matchup (relax if none available).
+    const freshTier = rrTier.filter((p) => !inMatchup(last, p.id))
+    const oppPool = freshTier.length ? freshTier : rrTier
 
     const upset = rng() < config.mix
     const opp = pickOpponent({ pickedElo: picked.elo, candidates: oppPool, upset, rng })
@@ -150,6 +175,7 @@ export function buildMatchups(input: {
     out.push(m)
     games.set(picked.id, (games.get(picked.id) ?? 0) + 1)
     games.set(opp.id, (games.get(opp.id) ?? 0) + 1)
+    pairs.set(pairKey(picked.id, opp.id), (pairs.get(pairKey(picked.id, opp.id)) ?? 0) + 1)
     last = m
   }
   return out
