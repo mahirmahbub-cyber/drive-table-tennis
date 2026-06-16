@@ -177,36 +177,65 @@
    PIXEL RALLY — looping table-tennis hero animation
    GPU-only transforms; pauses under reduced-motion.
    ═══════════════════════════════════════════════ */
+/* One shared 3.2s rally timeline so X and Y stay in lockstep. The rhythm is a real
+   exchange: hit(L) → arc over the net → ONE bounce on the right side → hit(R) →
+   arc back → ONE bounce on the left side → hit(L). The ball is hit just after it
+   bounces on the receiver's own half — exactly like a table-tennis rally.
+   Event map:  0% hit-L · 22% apex · 42% bounce-right · 50% hit-R · 72% apex · 92% bounce-left · 100% hit-L */
 @keyframes rally-x {
-  from { transform: translateX(0); }
-  to   { transform: translateX(208px); }
+  0%   { transform: translateX(0); }     /* hit at left paddle  */
+  22%  { transform: translateX(100px); } /* apex, crossing the net */
+  42%  { transform: translateX(170px); } /* bounce on the right half */
+  50%  { transform: translateX(208px); } /* hit at right paddle */
+  72%  { transform: translateX(108px); } /* apex, crossing the net */
+  92%  { transform: translateX(38px); }  /* bounce on the left half */
+  100% { transform: translateX(0); }     /* hit at left paddle */
 }
+/* Gravity arc: ease-out rising (hangs at the apex), ease-in falling (snaps onto the
+   table). translateY 5px = table contact, -44px = apex, -14px = paddle-contact height. */
 @keyframes rally-y {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-40px); }
-  100% { transform: translateY(0); }
+  0%   { transform: translateY(-14px); animation-timing-function: cubic-bezier(0.20, 0.62, 0.38, 1); }
+  22%  { transform: translateY(-44px); animation-timing-function: cubic-bezier(0.66, 0, 0.80, 0.30); }
+  42%  { transform: translateY(5px);   animation-timing-function: cubic-bezier(0.20, 0.62, 0.38, 1); }
+  50%  { transform: translateY(-14px); animation-timing-function: cubic-bezier(0.20, 0.62, 0.38, 1); }
+  72%  { transform: translateY(-44px); animation-timing-function: cubic-bezier(0.66, 0, 0.80, 0.30); }
+  92%  { transform: translateY(5px);   animation-timing-function: cubic-bezier(0.20, 0.62, 0.38, 1); }
+  100% { transform: translateY(-14px); }
 }
+/* Squash flat on each table bounce, stretch slightly at each apex — sells the impact. */
+@keyframes rally-squash {
+  0%, 50%, 100% { transform: scale(1, 1); }
+  22%, 72%      { transform: scale(0.92, 1.1); }  /* apex stretch */
+  42%, 92%      { transform: scale(1.34, 0.66); } /* bounce squash */
+  48%, 98%      { transform: scale(1, 1); }       /* spring back */
+}
+/* Hold, then a fast snap to meet the ball, then recover — a hit, not a sway. */
 @keyframes rally-hit-left {
-  0%, 92%, 100% { transform: rotate(0deg); }
-  96%           { transform: rotate(-22deg); }
+  0%   { transform: rotate(-26deg); animation-timing-function: ease-out; } /* strike as ball arrives */
+  8%   { transform: rotate(0deg); }
+  88%  { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.3, 0, 0.1, 1); }
+  100% { transform: rotate(-26deg); }                                      /* snap into the ball */
 }
 @keyframes rally-hit-right {
-  0%, 42%, 54%, 100% { transform: rotate(0deg); }
-  48%                { transform: rotate(22deg); }
+  0%, 42%   { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.3, 0, 0.1, 1); }
+  50%       { transform: rotate(26deg); animation-timing-function: ease-out; } /* strike as ball arrives */
+  58%, 100% { transform: rotate(0deg); }
 }
+/* Trail shows only at the fast net crossings, where a real ball would blur. */
 @keyframes rally-trail {
-  0%, 100% { opacity: 0; }
-  50%      { opacity: 0.55; }
+  0%, 42%, 50%, 92%, 100% { opacity: 0; }
+  22%, 72%                { opacity: 0.45; }
 }
 
-.rally-ball-x { animation: rally-x 1.6s ease-in-out infinite alternate; }
-.rally-ball-y { animation: rally-y 0.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.rally-paddle-l { animation: rally-hit-left 3.2s linear infinite; transform-box: fill-box; transform-origin: bottom center; }
-.rally-paddle-r { animation: rally-hit-right 3.2s linear infinite; transform-box: fill-box; transform-origin: bottom center; }
-.rally-trail { animation: rally-trail 1.6s ease-in-out infinite alternate; }
+.rally-ball-x { animation: rally-x 2.4s linear infinite; }
+.rally-ball-y { animation: rally-y 2.4s infinite; transform-box: fill-box; transform-origin: center; }
+.rally-ball-squash { animation: rally-squash 2.4s infinite; transform-box: fill-box; transform-origin: center bottom; }
+.rally-paddle-l { animation: rally-hit-left 2.4s linear infinite; transform-box: fill-box; transform-origin: bottom center; }
+.rally-paddle-r { animation: rally-hit-right 2.4s linear infinite; transform-box: fill-box; transform-origin: bottom center; }
+.rally-trail { animation: rally-trail 2.4s linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .rally-ball-x, .rally-ball-y, .rally-paddle-l, .rally-paddle-r, .rally-trail {
+  .rally-ball-x, .rally-ball-y, .rally-ball-squash, .rally-paddle-l, .rally-paddle-r, .rally-trail {
     animation: none;
   }
 }

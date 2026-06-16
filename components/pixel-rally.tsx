@@ -40,14 +40,16 @@ export function PixelRally() {
       <Paddle x={30} color="#2960c5" className="rally-paddle-l" />
       <Paddle x={270} color="#ff5e55" className="rally-paddle-r" />
 
-      {/* ball: outer group sweeps X, inner group bounces Y */}
+      {/* ball: outer group sweeps X, middle group arcs Y (gravity), inner group squashes on impact */}
       <g className="rally-ball-x">
         <g className="rally-ball-y">
-          {/* trail ghosts */}
+          {/* trail ghosts — strongest at mid-flight, where the ball moves fastest */}
           <rect className="rally-trail" x={40} y={84} width={6} height={6} fill="#3b97fa" />
           <rect className="rally-trail" x={46} y={84} width={6} height={6} fill="#3b97fa" opacity={0.4} />
           {/* ball */}
-          <rect x={52} y={82} width={9} height={9} rx={1} fill="#ffffff" stroke="#161616" strokeWidth={1.5} />
+          <g className="rally-ball-squash">
+            <rect x={52} y={82} width={9} height={9} rx={1} fill="#ffffff" stroke="#161616" strokeWidth={1.5} />
+          </g>
         </g>
       </g>
     </svg>
