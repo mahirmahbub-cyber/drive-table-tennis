@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { LoadingOverlay } from '@/components/loading-overlay'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -23,18 +24,25 @@ export function PlayerEditDialog({ player }: { player: PlayerData }) {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
 
   async function handle(formData: FormData) {
+    if (submitting.current) return
+    submitting.current = true
     setError(null)
     setPending(true)
-    const r = await updatePlayer(player.id, formData)
-    setPending(false)
-    if (r && 'error' in r) {
-      setError(r.error ?? 'Unknown error')
-      return
+    try {
+      const r = await updatePlayer(player.id, formData)
+      if (r && 'error' in r) {
+        setError(r.error ?? 'Unknown error')
+        return
+      }
+      setOpen(false)
+      router.refresh()
+    } finally {
+      setPending(false)
+      submitting.current = false
     }
-    setOpen(false)
-    router.refresh()
   }
 
   const field =
@@ -56,6 +64,7 @@ export function PlayerEditDialog({ player }: { player: PlayerData }) {
             <DialogTitle className="font-display">Edit {player.name}</DialogTitle>
           </DialogHeader>
           <form action={handle} className="space-y-4">
+            <LoadingOverlay open={pending} label="Saving profile…" />
             <label className="block">
               <span className={labelText}>Name</span>
               <input name="name" required defaultValue={player.name} className={field} />

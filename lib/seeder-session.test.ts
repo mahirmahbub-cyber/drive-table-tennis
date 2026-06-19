@@ -46,10 +46,10 @@ describe('generate', () => {
 })
 
 describe('buildLogFields', () => {
-  it('maps a finished matchup to logMatch form fields', () => {
-    expect(buildLogFields({ aId: 'a', bId: 'b' }, [11, 7], 240)).toEqual({
+  it('maps a finished matchup to logMatch form fields with an explicit playedAt', () => {
+    expect(buildLogFields({ aId: 'a', bId: 'b' }, [11, 7], 240, '2026-06-19T03:30:00.000Z')).toEqual({
       playerAId: 'a', playerBId: 'b', set_0_a: '11', set_0_b: '7',
-      durationSeconds: '240', playedAt: '',
+      durationSeconds: '240', playedAt: '2026-06-19T03:30:00.000Z',
     })
   })
 })

@@ -2,10 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { and, eq, gte, ilike } from 'drizzle-orm'
 import { db, players } from '@/lib/db'
 import { playerCreateSchema } from '@/lib/validators'
 import { uploadPlayerPhoto } from '@/lib/upload'
+import { isDuplicatePlayer, PLAYER_DEDUP_WINDOW_MS } from '@/lib/player-dedup'
 
 function emptyToNull(v: FormDataEntryValue | null): string | null {
   if (typeof v !== 'string') return null
@@ -22,6 +23,15 @@ export async function createPlayerSelfServe(formData: FormData) {
   })
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message }
+  }
+
+  const nowMs = Date.now()
+  const recent = await db
+    .select({ name: players.name, createdAt: players.createdAt })
+    .from(players)
+    .where(and(gte(players.createdAt, new Date(nowMs - PLAYER_DEDUP_WINDOW_MS)), ilike(players.name, parsed.data.name)))
+  if (recent.some((r) => isDuplicatePlayer({ name: r.name, createdAtMs: r.createdAt.getTime() }, parsed.data.name, nowMs))) {
+    return { error: 'Looks like that player was just added.' }
   }
 
   let photoUrl: string | null = null
@@ -57,6 +67,15 @@ export async function createPlayerAdmin(formData: FormData) {
     email: formData.get('email'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0].message }
+
+  const nowMs = Date.now()
+  const recent = await db
+    .select({ name: players.name, createdAt: players.createdAt })
+    .from(players)
+    .where(and(gte(players.createdAt, new Date(nowMs - PLAYER_DEDUP_WINDOW_MS)), ilike(players.name, parsed.data.name)))
+  if (recent.some((r) => isDuplicatePlayer({ name: r.name, createdAtMs: r.createdAt.getTime() }, parsed.data.name, nowMs))) {
+    return { error: 'Looks like that player was just added.' }
+  }
 
   let photoUrl: string | null = null
   const photo = formData.get('photo')

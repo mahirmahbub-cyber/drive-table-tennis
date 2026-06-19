@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
+import { LoadingOverlay } from '@/components/loading-overlay'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { formatDuration } from '@/lib/stats'
 import { Stepper } from '@/components/stepper'
@@ -159,6 +160,7 @@ export function MatchLogForm({
 
   return (
     <form key={savedTick} action={handle} className="space-y-6">
+      <LoadingOverlay open={pending} label="Saving match…" />
       <input type="hidden" name="durationSeconds" value={duration || ''} readOnly />
 
       {/* Mode toggle */}

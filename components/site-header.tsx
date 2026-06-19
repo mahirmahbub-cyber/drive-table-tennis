@@ -8,14 +8,17 @@ import clsx from 'clsx'
 import { Menu, Plus, X } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 
-const NAV = [
+const STATS_NAV = [
   { href: '/players', label: 'Players' },
   { href: '/matches', label: 'Matches' },
   { href: '/matrix', label: 'Mogboard' },
   { href: '/tournaments', label: 'Tournaments' },
+]
+const TOOLS_NAV = [
   { href: '/calculator', label: 'Calculator' },
   { href: '/seeder', label: 'Seeder' },
 ]
+const NAV = [...STATS_NAV, ...TOOLS_NAV]
 
 function LogoMark() {
   return (
@@ -67,7 +70,8 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
         </Link>
 
         <nav className="hidden items-center gap-0.5 text-sm lg:flex lg:gap-1">
-          {NAV.map((item) => {
+          {/* Stats / views */}
+          {STATS_NAV.map((item) => {
             const active = isActive(pathname, item.href)
             return (
               <Link
@@ -86,17 +90,40 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
             )
           })}
 
-          {/* Log a game — visible to everyone; scrolls to the inline logger */}
+          <span aria-hidden className="mx-1.5 h-5 w-px bg-border" />
+
+          {/* Tools */}
+          {TOOLS_NAV.map((item) => {
+            const active = isActive(pathname, item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={clsx(
+                  'rounded-md px-2.5 py-1.5 transition-colors duration-150 lg:px-3',
+                  active
+                    ? 'text-primary font-medium bg-secondary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                )}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+
+          <span aria-hidden className="mx-1.5 h-5 w-px bg-border" />
+
+          {/* Actions / utility */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
           <a
             href="/#log"
-            className="ml-1 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary lg:px-3"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary lg:px-3"
           >
             <Plus className="h-3.5 w-3.5" />
             Log a game
           </a>
 
-          {/* Admin auth controls */}
           {isLoggedIn ? (
             <>
               <Link

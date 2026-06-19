@@ -9,7 +9,7 @@ import { RivalryWatch } from '@/components/home/rivalry-watch'
 import { ByTheNumbers } from '@/components/home/by-the-numbers'
 import { H2hBanner } from '@/components/home/h2h-banner'
 import { loadHomeData } from '@/lib/home-data'
-import { movers, playerAggregates, giantKills, rankWithin } from '@/lib/stats-engine'
+import { movers, playerAggregates, giantKills, rankWithin, recentlyActive } from '@/lib/stats-engine'
 import { topTitle, type Title } from '@/lib/titles'
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +19,8 @@ export default async function HomePage() {
   const now = data.now
   const since = new Date(now - 7 * 86400 * 1000)
   const weekMovers = movers(data.engineMatches, since)
+  const activeIds = recentlyActive(data.engineMatches, since)
+  const leaderboardPlayers = data.activePlayers.filter((p) => activeIds.has(p.id))
 
   const allElos = data.activePlayers.map((p) => p.currentElo)
   const moverById = new Map(weekMovers.map((mv) => [mv.playerId, mv.delta] as const))
@@ -87,7 +89,7 @@ export default async function HomePage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <div className="space-y-8 min-w-0">
           <SuperlativesStrip data={data} now={now} movers={weekMovers} />
-          <Leaderboard players={data.activePlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
+          <Leaderboard players={leaderboardPlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
           <RecentMatches />
         </div>
         <div className="space-y-8 min-w-0">

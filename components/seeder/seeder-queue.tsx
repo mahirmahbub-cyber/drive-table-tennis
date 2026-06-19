@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { LoadingOverlay } from '@/components/loading-overlay'
 import { MatchStopwatch } from '@/components/match-stopwatch'
 import { Stepper } from '@/components/stepper'
 import { formatDuration } from '@/lib/stats'
@@ -107,6 +108,7 @@ function ActiveCard({
   const [b, setB] = useState<number | ''>('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
 
   if (!current) {
     return (
@@ -119,14 +121,16 @@ function ActiveCard({
   const isPlaying = current.status === 'playing'
 
   async function save() {
+    if (submitting.current) return
     if (a === '' || b === '') {
       setError('Enter both scores.')
       return
     }
+    submitting.current = true
     setError(null)
     setPending(true)
     try {
-      const fields = buildLogFields(current!, [Number(a), Number(b)], duration)
+      const fields = buildLogFields(current!, [Number(a), Number(b)], duration, new Date().toISOString())
       const fd = new FormData()
       Object.entries(fields).forEach(([k, v]) => fd.set(k, v))
       const r = await logMatch(fd)
@@ -140,11 +144,13 @@ function ActiveCard({
       setB('')
     } finally {
       setPending(false)
+      submitting.current = false
     }
   }
 
   return (
     <div className="rounded-lg border border-primary/40 bg-primary/5 p-4 space-y-4">
+      <LoadingOverlay open={pending} label="Saving game…" />
       <div className="text-center">
         <span className="font-display text-xl font-bold">{nameOf(session, current.aId)}</span>
         <span className="mx-2 text-muted-foreground">vs</span>

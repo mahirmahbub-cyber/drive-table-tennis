@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { LoadingOverlay } from '@/components/loading-overlay'
 import { createTournament } from '@/app/actions/tournaments'
 
 type PlayerOption = { id: string; name: string; currentElo: number }
@@ -8,6 +9,8 @@ type PlayerOption = { id: string; name: string; currentElo: number }
 export function TournamentCreateForm({ players }: { players: PlayerOption[] }) {
   const [selected, setSelected] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
 
   function toggle(id: string) {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
@@ -35,14 +38,24 @@ export function TournamentCreateForm({ players }: { players: PlayerOption[] }) {
   }
 
   async function handle(formData: FormData) {
+    if (submitting.current) return
+    submitting.current = true
+    setError(null)
+    setPending(true)
     formData.set('seedOrder', JSON.stringify(selected))
     for (const id of selected) formData.append('playerIds', id)
-    const r = await createTournament(formData)
-    if (r && 'error' in r) setError(r.error)
+    try {
+      const r = await createTournament(formData)
+      if (r && 'error' in r) setError(r.error)
+    } finally {
+      setPending(false)
+      submitting.current = false
+    }
   }
 
   return (
     <form action={handle} className="space-y-6">
+      <LoadingOverlay open={pending} label="Creating tournament…" />
       <label className="block">
         <span className="text-sm font-medium">Tournament name</span>
         <input
@@ -107,7 +120,7 @@ export function TournamentCreateForm({ players }: { players: PlayerOption[] }) {
       {error && <div className="text-sm text-red-600">{error}</div>}
       <button
         type="submit"
-        disabled={selected.length < 2}
+        disabled={selected.length < 2 || pending}
         className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
       >
         Start tournament

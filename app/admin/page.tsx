@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { rebuildElo } from '@/app/actions/matches'
+import { PostToSlackButtons } from '@/components/admin/post-to-slack-buttons'
 
 const links = [
   { href: '/admin/matches/new', title: 'Log a match', desc: 'Record a game with a live stopwatch' },
@@ -44,6 +45,14 @@ export default function AdminHomePage() {
           Replays the entire match history and rewrites all per-match ELO snapshots and each
           player&apos;s current ELO. Safe to run anytime.
         </p>
+      </div>
+
+      <div className="mt-6 rounded-lg border border-border bg-card p-4">
+        <div className="section-header font-display">Slack</div>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Post a recap to the Slack channel on demand — the same content the weekly/daily cron sends.
+        </p>
+        <PostToSlackButtons />
       </div>
     </main>
   )

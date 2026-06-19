@@ -242,6 +242,47 @@ export function giantKills(all: EngineMatch[], playerId: string, gap = 100): num
   return n
 }
 
+// ── Digest / activity helpers ──────────────────────────────────────────────────
+
+/** Matches whose playedAt falls in [start, end). */
+export function inRange(all: EngineMatch[], start: Date, end: Date): EngineMatch[] {
+  const s = start.getTime()
+  const e = end.getTime()
+  return all.filter((m) => {
+    const t = m.playedAt.getTime()
+    return t >= s && t < e
+  })
+}
+
+/** Match with the largest winner ELO delta (most rating changed hands). Null-winner matches ignored. */
+export function biggestEloSwingMatch(matches: EngineMatch[]): EngineMatch | null {
+  let best: EngineMatch | null = null
+  let bestSwing = -1
+  for (const m of matches) {
+    if (!m.winnerId) continue
+    const winnerIsA = m.winnerId === m.playerAId
+    const swing = Math.abs(winnerIsA ? m.eloAAfter - m.eloABefore : m.eloBAfter - m.eloBBefore)
+    if (swing > bestSwing) {
+      bestSwing = swing
+      best = m
+    }
+  }
+  return best
+}
+
+/** Set of player ids that appear in any match played at/after `since`. */
+export function recentlyActive(matches: EngineMatch[], since: Date): Set<string> {
+  const s = since.getTime()
+  const ids = new Set<string>()
+  for (const m of matches) {
+    if (m.playedAt.getTime() >= s) {
+      ids.add(m.playerAId)
+      ids.add(m.playerBId)
+    }
+  }
+  return ids
+}
+
 // ── Head-to-head detail ───────────────────────────────────────────────────────
 
 export type H2HMatchResult = 'W' | 'L'

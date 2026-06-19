@@ -1,18 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { LoadingOverlay } from '@/components/loading-overlay'
 import { createPlayerSelfServe } from '@/app/actions/players'
 
 export function JoinForm() {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
 
   async function handleSubmit(formData: FormData) {
+    if (submitting.current) return
+    submitting.current = true
     setError(null)
     setPending(true)
-    const result = await createPlayerSelfServe(formData)
-    setPending(false)
-    if (result && 'error' in result) setError(result.error)
+    try {
+      const result = await createPlayerSelfServe(formData)
+      if (result && 'error' in result) setError(result.error)
+    } finally {
+      setPending(false)
+      submitting.current = false
+    }
   }
 
   const fieldClass =
@@ -21,6 +29,7 @@ export function JoinForm() {
 
   return (
     <form action={handleSubmit} className="space-y-4">
+      <LoadingOverlay open={pending} label="Creating profile…" />
       <label className="block">
         <span className={labelClass}>Photo (optional, ≤2 MB)</span>
         <input

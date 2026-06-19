@@ -137,11 +137,13 @@ export function generateMore(s: SessionState, minutes: number, seed: number): Se
 
 // ─── Logging ────────────────────────────────────────────────────────────────
 
-/** Build the field map the existing `logMatch` server action expects (single game). */
+/** Build the field map the existing `logMatch` server action expects (single game).
+ *  `playedAtISO` is the exact instant the game finished (e.g. `new Date().toISOString()`). */
 export function buildLogFields(
   matchup: { aId: string; bId: string },
   score: [number, number],
-  durationSeconds: number
+  durationSeconds: number,
+  playedAtISO: string
 ): Record<string, string> {
   return {
     playerAId: matchup.aId,
@@ -149,6 +151,6 @@ export function buildLogFields(
     set_0_a: String(score[0]),
     set_0_b: String(score[1]),
     durationSeconds: String(durationSeconds),
-    playedAt: '',
+    playedAt: playedAtISO,
   }
 }

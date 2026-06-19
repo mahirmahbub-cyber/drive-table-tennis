@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, Trash2 } from 'lucide-react'
 import {
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { MatchLogForm, type MatchFormInitial } from '@/components/match-log-form'
 import { deleteMatch } from '@/app/actions/matches'
+import { LoadingOverlay } from '@/components/loading-overlay'
 
 type PlayerOption = { id: string; name: string; nickname: string | null; currentElo: number }
 
@@ -30,17 +31,25 @@ export function MatchRowActions({
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [pending, setPending] = useState(false)
+  const submitting = useRef(false)
 
   async function confirmDelete() {
+    if (submitting.current) return
+    submitting.current = true
     setPending(true)
-    await deleteMatch(initial.id)
-    setPending(false)
-    setDeleteOpen(false)
-    router.refresh()
+    try {
+      await deleteMatch(initial.id)
+      setDeleteOpen(false)
+      router.refresh()
+    } finally {
+      setPending(false)
+      submitting.current = false
+    }
   }
 
   return (
     <div className="flex items-center gap-1">
+      <LoadingOverlay open={pending} label="Deleting match…" />
       {/* Edit */}
       <button
         type="button"
