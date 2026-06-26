@@ -5,8 +5,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as Dialog from '@radix-ui/react-dialog'
 import clsx from 'clsx'
-import { Menu, Plus, X } from 'lucide-react'
+import { ChevronDown, CircleUser, Menu, Plus, X } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const STATS_NAV = [
   { href: '/players', label: 'Players' },
@@ -18,7 +25,6 @@ const TOOLS_NAV = [
   { href: '/calculator', label: 'Calculator' },
   { href: '/seeder', label: 'Seeder' },
 ]
-const NAV = [...STATS_NAV, ...TOOLS_NAV]
 
 function LogoMark() {
   return (
@@ -43,10 +49,20 @@ function isActive(pathname: string, href: string) {
   return href === '/' ? pathname === '/' : pathname.startsWith(href)
 }
 
+function navLinkClass(active: boolean) {
+  return clsx(
+    'rounded-md px-2.5 py-1.5 transition-colors duration-150 xl:px-3',
+    active
+      ? 'text-primary font-medium bg-secondary'
+      : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+  )
+}
+
 export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPathname, setMenuPathname] = useState(pathname)
+  const toolsActive = TOOLS_NAV.some((item) => isActive(pathname, item.href))
 
   // Close the mobile menu when navigation changes the route — adjust during render, not in an effect.
   if (pathname !== menuPathname) {
@@ -69,8 +85,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 text-sm xl:flex lg:gap-1">
-          {/* Stats / views */}
+        <nav className="hidden flex-1 items-center gap-1 text-sm xl:flex">
           {STATS_NAV.map((item) => {
             const active = isActive(pathname, item.href)
             return (
@@ -78,84 +93,83 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className={clsx(
-                  'rounded-md px-2.5 py-1.5 transition-colors duration-150 lg:px-3',
-                  active
-                    ? 'text-primary font-medium bg-secondary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-                )}
+                className={navLinkClass(active)}
               >
                 {item.label}
               </Link>
             )
           })}
 
-          <span aria-hidden className="mx-1.5 h-5 w-px bg-border" />
-
-          {/* Tools */}
-          {TOOLS_NAV.map((item) => {
-            const active = isActive(pathname, item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? 'page' : undefined}
-                className={clsx(
-                  'rounded-md px-2.5 py-1.5 transition-colors duration-150 lg:px-3',
-                  active
-                    ? 'text-primary font-medium bg-secondary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-                )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-current={toolsActive ? 'page' : undefined}
+                className={clsx(navLinkClass(toolsActive), 'inline-flex items-center gap-1')}
               >
-                {item.label}
-              </Link>
-            )
-          })}
+                Tools
+                <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-40">
+              {TOOLS_NAV.map((item) => {
+                const active = isActive(pathname, item.href)
+                return (
+                  <DropdownMenuItem key={item.href} asChild>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={clsx(active && 'text-primary font-medium')}
+                    >
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <span aria-hidden className="mx-1.5 h-5 w-px bg-border" />
-
-          {/* Actions / utility */}
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
-          <a
-            href="/#log"
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 font-medium text-foreground transition-colors duration-150 hover:bg-secondary lg:px-3"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Log a game
-          </a>
-
-          {isLoggedIn ? (
-            <>
-              <Link
-                href="/admin"
-                className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted lg:px-3"
-              >
-                Admin
-              </Link>
-              <form action={logout}>
+          <div className="ml-auto flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
-                  type="submit"
-                  className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted lg:px-3"
+                  type="button"
+                  aria-label="Account menu"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
                 >
-                  Sign out
+                  <CircleUser className="h-5 w-5" />
                 </button>
-              </form>
-            </>
-          ) : (
-            <Link
-              href="/admin/login"
-              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted lg:px-3"
-            >
-              Admin Log In
-            </Link>
-          )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                {isLoggedIn ? (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">Admin</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <form action={logout}>
+                      <DropdownMenuItem asChild>
+                        <button type="submit" className="w-full text-left">
+                          Sign out
+                        </button>
+                      </DropdownMenuItem>
+                    </form>
+                  </>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/login">Admin Log In</Link>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <Link
-            href="/join"
-            className="ml-1 rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e] lg:ml-2 lg:px-3.5"
-          >
-            Join
-          </Link>
+            <Link
+              href="/join"
+              className="rounded-md bg-primary px-3.5 py-1.5 font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
+            >
+              Join
+            </Link>
+          </div>
         </nav>
 
         <div className="flex items-center gap-1.5 xl:hidden">
@@ -207,7 +221,30 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                 </div>
 
                 <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4 text-base">
-                  {NAV.map((item) => {
+                  {STATS_NAV.map((item) => {
+                    const active = isActive(pathname, item.href)
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? 'page' : undefined}
+                        onClick={() => setMenuOpen(false)}
+                        className={clsx(
+                          'rounded-lg px-4 py-3 font-medium transition-colors duration-150',
+                          active
+                            ? 'bg-secondary text-primary'
+                            : 'text-foreground hover:bg-muted',
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+
+                  <p className="px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Tools
+                  </p>
+                  {TOOLS_NAV.map((item) => {
                     const active = isActive(pathname, item.href)
                     return (
                       <Link
@@ -231,7 +268,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                   <a
                     href="/#log"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-lg px-4 py-3 font-medium text-foreground transition-colors duration-150 hover:bg-muted"
+                    className="mt-1 flex items-center gap-2 rounded-lg px-4 py-3 font-medium text-foreground transition-colors duration-150 hover:bg-muted"
                   >
                     <Plus className="h-4 w-4" />
                     Log a game
