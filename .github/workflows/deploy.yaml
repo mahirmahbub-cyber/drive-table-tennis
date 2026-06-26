@@ -41,4 +41,4 @@ jobs:
         with:
           api_token: ${{ secrets.DOKPLOY_API_KEY }}
           application_id: ${{ vars.APPLICATION_ID }}
-          dokploy_url: ${{ secrets.DOKPLOY_URL }}
+          dokploy_url: ${{ vars.DOKPLOY_URL }}
