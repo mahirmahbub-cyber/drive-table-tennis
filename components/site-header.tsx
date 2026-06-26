@@ -56,7 +56,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-2 px-4 md:px-6">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 md:px-6">
         <Link href="/" className="group flex items-center gap-2.5">
           <LogoMark />
           <span className="hidden flex-col leading-none sm:flex">
@@ -69,7 +69,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 text-sm lg:flex lg:gap-1">
+        <nav className="hidden items-center gap-0.5 text-sm xl:flex lg:gap-1">
           {/* Stats / views */}
           {STATS_NAV.map((item) => {
             const active = isActive(pathname, item.href)
@@ -158,7 +158,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-1.5 lg:hidden">
+        <div className="flex items-center gap-1.5 xl:hidden">
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
           <a
             href="/#log"
@@ -180,10 +180,10 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
             </Dialog.Trigger>
 
             <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 lg:hidden" />
+              <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 xl:hidden" />
               <Dialog.Content
                 aria-describedby={undefined}
-                className="fixed inset-0 z-50 flex flex-col bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 lg:hidden"
+                className="fixed inset-0 z-50 flex flex-col bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 xl:hidden"
               >
                 <Dialog.Title className="sr-only">Menu</Dialog.Title>
 
