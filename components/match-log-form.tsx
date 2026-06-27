@@ -9,6 +9,7 @@ import { Stepper } from '@/components/stepper'
 import { inferWinnerSide, setsWon, type SetScore } from '@/lib/match-format'
 import { RaceResult } from '@/components/race-result'
 import type { LogResult } from '@/app/actions/matches'
+import { instantToWallClock } from '@/lib/tz'
 
 type PlayerOption = { id: string; name: string; nickname: string | null; currentElo: number }
 
@@ -19,12 +20,6 @@ export type MatchFormInitial = {
   sets: Array<[number, number]>
   playedAt: Date | null
   durationSeconds: number | null
-}
-
-function toLocalDatetimeValue(d: Date): string {
-  // yyyy-MM-ddThh:mm in local time, for <input type="datetime-local">
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 export function MatchLogForm({
@@ -46,8 +41,10 @@ export function MatchLogForm({
     initial?.durationSeconds ? formatDuration(initial.durationSeconds) : ''
   )
   const [playedAt, setPlayedAt] = useState<string>(
-    initial?.playedAt ? toLocalDatetimeValue(initial.playedAt) : ''
+    initial?.playedAt ? instantToWallClock(initial.playedAt) : ''
   )
+  // Stopwatch auto-starts; focusing the manual-duration field pauses it for good.
+  const [timerRunning, setTimerRunning] = useState(true)
 
   // New state for Quick/Full mode toggle and score tracking
   const initialSetCount = Math.min(7, Math.max(1, initial?.sets.length ?? 1))
@@ -68,7 +65,7 @@ export function MatchLogForm({
   // on the datetime-local input. This is the canonical pattern for client-only init.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!isEdit && playedAt === '') setPlayedAt(toLocalDatetimeValue(new Date()))
+    if (!isEdit && playedAt === '') setPlayedAt(instantToWallClock(new Date()))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -114,7 +111,8 @@ export function MatchLogForm({
         setSavedTick((t) => t + 1)
         setDuration(0)
         setDurationText('')
-        setPlayedAt(toLocalDatetimeValue(new Date()))
+        setTimerRunning(true)
+        setPlayedAt(instantToWallClock(new Date()))
         setScores(Array.from({ length: 7 }, () => ['', '']))
         setSetCount(1)
         setMode('quick')
@@ -275,12 +273,18 @@ export function MatchLogForm({
       {/* Duration */}
       <div className="space-y-2">
         <div className="section-header font-display">Game duration</div>
-        <MatchStopwatch value={duration} onChange={handleStopwatchChange} />
+        <MatchStopwatch
+          value={duration}
+          onChange={handleStopwatchChange}
+          running={timerRunning}
+          onRunningChange={setTimerRunning}
+        />
         <label className="flex items-center gap-3 text-sm">
           <span className="text-muted-foreground">Or enter manually (mm:ss)</span>
           <input
             value={durationText}
             onChange={(e) => handleDurationText(e.target.value)}
+            onFocus={() => setTimerRunning(false)}
             placeholder="12:30"
             inputMode="numeric"
             className="w-24 rounded-md border border-input bg-card px-2 py-1.5 font-mono nums text-sm focus:outline-none focus:ring-2 focus:ring-ring"

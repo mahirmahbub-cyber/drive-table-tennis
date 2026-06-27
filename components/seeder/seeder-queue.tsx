@@ -104,6 +104,7 @@ function ActiveCard({
 }) {
   const current = active ?? firstPending
   const [duration, setDuration] = useState(0)
+  const [timerRunning, setTimerRunning] = useState(true)
   const [a, setA] = useState<number | ''>('')
   const [b, setB] = useState<number | ''>('')
   const [error, setError] = useState<string | null>(null)
@@ -167,7 +168,12 @@ function ActiveCard({
         </button>
       ) : (
         <div className="space-y-4">
-          <MatchStopwatch value={duration} onChange={setDuration} />
+          <MatchStopwatch
+            value={duration}
+            onChange={setDuration}
+            running={timerRunning}
+            onRunningChange={setTimerRunning}
+          />
           <div className="flex items-center justify-center gap-3">
             <Stepper name="a" ariaLabel="player A score" defaultValue={a} onValueChange={setA} />
             <span className="text-muted-foreground">–</span>

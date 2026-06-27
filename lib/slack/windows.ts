@@ -1,23 +1,10 @@
-export const SYDNEY_TZ = 'Australia/Sydney'
+import { VENUE_TZ, tzOffsetMs } from '@/lib/tz'
+
+/** @deprecated Use `VENUE_TZ` from `@/lib/tz`. Kept so existing importers don't churn. */
+export const SYDNEY_TZ = VENUE_TZ
 
 export type Range = { start: Date; end: Date }
 type YMD = { year: number; month: number; day: number }
-
-/** Offset in ms that `tz` is ahead of UTC at the given instant. */
-function tzOffsetMs(instant: Date, tz: string): number {
-  const dtf = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz, hourCycle: 'h23',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-  })
-  const map: Record<string, string> = {}
-  for (const p of dtf.formatToParts(instant)) map[p.type] = p.value
-  const asUTC = Date.UTC(
-    Number(map.year), Number(map.month) - 1, Number(map.day),
-    Number(map.hour), Number(map.minute), Number(map.second),
-  )
-  return asUTC - instant.getTime()
-}
 
 /** Local calendar date (Y/M/D) in `tz` at the given instant. */
 function ymdInTz(instant: Date, tz: string): YMD {

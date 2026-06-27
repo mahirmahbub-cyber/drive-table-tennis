@@ -1,3 +1,5 @@
+import { formatInZone } from './tz'
+
 export type EngineMatch = {
   id: string
   playerAId: string
@@ -349,7 +351,7 @@ export function headToHeadDetail(all: EngineMatch[], p1: string, p2: string): H2
     cumulativeDelta += p1Delta
     eloSwingSeries.push({
       matchIndex: i + 1,
-      date: `${m.playedAt.getDate()} ${m.playedAt.toLocaleString('en', { month: 'short' })}`,
+      date: formatInZone(m.playedAt, { day: 'numeric', month: 'short' }),
       cumulativeDelta,
       matchDelta: p1Delta,
     })

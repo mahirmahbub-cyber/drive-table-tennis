@@ -4,6 +4,7 @@ import { and, asc, desc, eq, gte, ilike, isNotNull, isNull, lte, or, type SQL } 
 import { alias } from 'drizzle-orm/pg-core'
 import { formatDuration } from '@/lib/stats'
 import { MatchRowActions } from '@/components/admin/match-row-actions'
+import { wallClockToInstant, formatInZone } from '@/lib/tz'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +21,8 @@ export default async function AdminHistoryPage({
   if (sp.playerId) {
     conditions.push(or(eq(matches.playerAId, sp.playerId), eq(matches.playerBId, sp.playerId))!)
   }
-  if (sp.from) conditions.push(gte(matches.playedAt, new Date(sp.from)))
-  if (sp.to) conditions.push(lte(matches.playedAt, new Date(sp.to + 'T23:59:59')))
+  if (sp.from) conditions.push(gte(matches.playedAt, wallClockToInstant(sp.from + 'T00:00')))
+  if (sp.to) conditions.push(lte(matches.playedAt, wallClockToInstant(sp.to + 'T23:59:59')))
   if (sp.type === 'tournament') conditions.push(isNotNull(matches.tournamentId))
   if (sp.type === 'casual') conditions.push(isNull(matches.tournamentId))
   if (sp.q) conditions.push(or(ilike(a.name, `%${sp.q}%`), ilike(b.name, `%${sp.q}%`))!)
@@ -110,7 +111,7 @@ export default async function AdminHistoryPage({
           return (
             <li key={r.id} className="data-row text-sm">
               <span className="hidden w-24 shrink-0 font-mono text-[11px] text-muted-foreground sm:block">
-                {r.playedAt?.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                {r.playedAt && formatInZone(r.playedAt, { month: 'short', day: 'numeric' })}
               </span>
               <span className={`shrink-0 ${aWon ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>{r.aName}</span>
               <span className="flex-1 text-center font-mono nums text-xs text-muted-foreground">

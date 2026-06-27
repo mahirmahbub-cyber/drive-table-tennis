@@ -1,18 +1,21 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Play, Pause, RotateCcw } from 'lucide-react'
 import { formatDuration } from '@/lib/stats'
 
 export function MatchStopwatch({
   value,
   onChange,
+  running,
+  onRunningChange,
 }: {
   value: number
   onChange: (seconds: number) => void
+  // Controlled by the form so it can pause the clock (e.g. on manual-duration focus).
+  running: boolean
+  onRunningChange: (running: boolean) => void
 }) {
-  // Auto-start on mount — the component only mounts when the logger opens.
-  const [running, setRunning] = useState(true)
   const startedAt = useRef<number | null>(null)
   const baseSeconds = useRef(value)
 
@@ -31,16 +34,16 @@ export function MatchStopwatch({
 
   function toggle() {
     if (running) {
-      setRunning(false)
+      onRunningChange(false)
     } else {
       baseSeconds.current = value
       startedAt.current = Date.now()
-      setRunning(true)
+      onRunningChange(true)
     }
   }
 
   function reset() {
-    setRunning(false)
+    onRunningChange(false)
     baseSeconds.current = 0
     onChange(0)
   }

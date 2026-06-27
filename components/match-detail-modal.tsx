@@ -8,6 +8,7 @@ import { setsWon, inferWinnerSide, playerEloDelta } from '@/lib/match-format'
 import { formatDuration } from '@/lib/stats'
 import { AnimatedDial } from '@/components/animated-dial'
 import { DeltaCounter } from '@/components/motion/delta-counter'
+import { formatInZone } from '@/lib/tz'
 
 export function MatchDetailModal({
   id, open, onOpenChange,
@@ -52,7 +53,7 @@ export function MatchDetailModal({
         {detail && (
           <div className="space-y-4">
             <p className="font-mono text-xs text-muted-foreground">
-              {detail.playedAt?.toLocaleString(undefined, {
+              {detail.playedAt && formatInZone(detail.playedAt, {
                 day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
               })}
             </p>

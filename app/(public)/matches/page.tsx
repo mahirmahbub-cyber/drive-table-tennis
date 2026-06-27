@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { alias } from 'drizzle-orm/pg-core'
 import { computeDurationRecords, formatDuration, type DurationMatch } from '@/lib/stats'
 import { ViewGameButton } from '@/components/view-game-button'
+import { formatInZone } from '@/lib/tz'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,15 +86,9 @@ export default async function MatchesPage() {
           return (
             <li key={r.id} className="data-row text-sm">
               <span className="hidden w-28 shrink-0 font-mono text-[11px] text-muted-foreground sm:block">
-                {r.playedAt?.toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {r.playedAt && formatInZone(r.playedAt, { month: 'short', day: 'numeric' })}
                 {', '}
-                {r.playedAt?.toLocaleTimeString(undefined, {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
+                {r.playedAt && formatInZone(r.playedAt, { hour: 'numeric', minute: '2-digit' })}
               </span>
 
               {/* Matchup + scores scroll horizontally when they overflow; date/duration and View game stay pinned */}

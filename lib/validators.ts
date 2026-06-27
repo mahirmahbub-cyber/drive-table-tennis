@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { wallClockToInstant, hasExplicitZone } from '@/lib/tz'
 
 export const playerCreateSchema = z.object({
   name: z.string().trim().min(1).max(60),
@@ -14,12 +15,20 @@ export const setScoreSchema = z.tuple([
 
 const emptyToUndefined = (v: unknown) => (v === '' || v == null ? undefined : v)
 
+// A playedAt string with no timezone designator is venue-local (Australia/Sydney);
+// one carrying Z or an offset (e.g. the seeder's ISO instants) passes through unchanged.
+const toPlayedAt = (v: unknown) => {
+  if (v === '' || v == null) return undefined
+  if (typeof v === 'string' && !hasExplicitZone(v)) return wallClockToInstant(v)
+  return v
+}
+
 export const matchLogSchema = z
   .object({
     playerAId: z.string().uuid(),
     playerBId: z.string().uuid(),
     sets: z.array(setScoreSchema).min(1).max(7),
-    playedAt: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
+    playedAt: z.preprocess(toPlayedAt, z.coerce.date().optional()),
     durationSeconds: z.preprocess(
       emptyToUndefined,
       z.coerce.number().int().min(0).max(86400).optional()

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ViewGameButton } from '@/components/view-game-button'
 import { formatScoreForPlayer, gamesWon, type SetScore } from '@/lib/match-format'
+import { formatInZone } from '@/lib/tz'
 
 export type HistoryRow = {
   id: string
@@ -24,7 +25,7 @@ export function PlayerGamesHistory({ rows }: { rows: HistoryRow[] }) {
       {rows.map((r) => (
         <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 text-sm border-b border-border last:border-0">
           <span className="w-14 shrink-0 font-mono text-[11px] text-muted-foreground">
-            {new Date(r.playedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {formatInZone(new Date(r.playedAt), { month: 'short', day: 'numeric' })}
           </span>
           {(() => {
             const { a, b } = gamesWon(r.sets)

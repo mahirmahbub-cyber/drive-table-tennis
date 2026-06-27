@@ -14,6 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  LogoMark,
+  isActive,
+  navLinkClass,
+  mobileNavLinkClass,
+} from '@/components/site-nav-shared'
 
 const STATS_NAV = [
   { href: '/players', label: 'Players' },
@@ -25,38 +31,6 @@ const TOOLS_NAV = [
   { href: '/calculator', label: 'Calculator' },
   { href: '/seeder', label: 'Seeder' },
 ]
-
-function LogoMark() {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={30}
-      height={30}
-      aria-hidden
-      style={{ shapeRendering: 'crispEdges' as const }}
-    >
-      <rect x={2} y={2} width={28} height={28} rx={6} fill="#2960c5" />
-      {/* paddle blade */}
-      <rect x={9} y={7} width={11} height={13} rx={2} fill="#ffffff" />
-      <rect x={12} y={19} width={4} height={7} rx={1} fill="#10489e" />
-      {/* ball */}
-      <rect x={21} y={9} width={5} height={5} rx={1} fill="#ff5e55" />
-    </svg>
-  )
-}
-
-function isActive(pathname: string, href: string) {
-  return href === '/' ? pathname === '/' : pathname.startsWith(href)
-}
-
-function navLinkClass(active: boolean) {
-  return clsx(
-    'rounded-md px-2.5 py-1.5 transition-colors duration-150 xl:px-3',
-    active
-      ? 'text-primary font-medium bg-secondary'
-      : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-  )
-}
 
 export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
@@ -85,7 +59,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           </span>
         </Link>
 
-        <nav className="hidden flex-1 items-center gap-1 text-sm xl:flex">
+        <nav className="hidden items-center gap-1 text-sm xl:flex">
           {STATS_NAV.map((item) => {
             const active = isActive(pathname, item.href)
             return (
@@ -129,7 +103,9 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="ml-auto flex items-center gap-2">
+          <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
+
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -229,12 +205,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         onClick={() => setMenuOpen(false)}
-                        className={clsx(
-                          'rounded-lg px-4 py-3 font-medium transition-colors duration-150',
-                          active
-                            ? 'bg-secondary text-primary'
-                            : 'text-foreground hover:bg-muted',
-                        )}
+                        className={mobileNavLinkClass(active)}
                       >
                         {item.label}
                       </Link>
@@ -252,12 +223,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         onClick={() => setMenuOpen(false)}
-                        className={clsx(
-                          'rounded-lg px-4 py-3 font-medium transition-colors duration-150',
-                          active
-                            ? 'bg-secondary text-primary'
-                            : 'text-foreground hover:bg-muted',
-                        )}
+                        className={mobileNavLinkClass(active)}
                       >
                         {item.label}
                       </Link>
@@ -268,7 +234,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                   <a
                     href="/#log"
                     onClick={() => setMenuOpen(false)}
-                    className="mt-1 flex items-center gap-2 rounded-lg px-4 py-3 font-medium text-foreground transition-colors duration-150 hover:bg-muted"
+                    className={clsx(mobileNavLinkClass(false), 'mt-1 flex items-center gap-2')}
                   >
                     <Plus className="h-4 w-4" />
                     Log a game
@@ -279,14 +245,14 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                       <Link
                         href="/admin"
                         onClick={() => setMenuOpen(false)}
-                        className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors duration-150 hover:bg-muted"
+                        className={mobileNavLinkClass(false)}
                       >
                         Admin
                       </Link>
                       <form action={logout} className="contents">
                         <button
                           type="submit"
-                          className="rounded-lg px-4 py-3 text-left font-medium text-foreground transition-colors duration-150 hover:bg-muted"
+                          className={clsx(mobileNavLinkClass(false), 'text-left')}
                         >
                           Sign out
                         </button>
@@ -296,7 +262,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <Link
                       href="/admin/login"
                       onClick={() => setMenuOpen(false)}
-                      className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors duration-150 hover:bg-muted"
+                      className={mobileNavLinkClass(false)}
                     >
                       Admin Log In
                     </Link>

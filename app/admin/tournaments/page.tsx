@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { desc, eq, sql } from 'drizzle-orm'
 import { db, tournaments, tournamentEntries } from '@/lib/db'
+import { formatInZone } from '@/lib/tz'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export default async function AdminTournamentsPage() {
           <li key={t.id} className="data-row">
             <Link href={`/admin/tournaments/${t.id}`} className="flex-1 font-medium hover:text-primary">{t.name}</Link>
             <span className="text-xs text-muted-foreground">{t.players} players</span>
-            <span className="text-xs text-muted-foreground">{t.createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+            <span className="text-xs text-muted-foreground">{formatInZone(t.createdAt, { month: 'short', day: 'numeric' })}</span>
             <span className="rounded-full bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-wider text-secondary-foreground">{t.status.replace('_', ' ')}</span>
           </li>
         ))}
