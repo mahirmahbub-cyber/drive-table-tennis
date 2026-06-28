@@ -24,7 +24,6 @@ import {
 // than `href` so a link stays active across its sub-pages (e.g. tournament detail).
 const ADMIN_NAV = [
   { href: '/admin/players', label: 'Players', match: '/admin/players' },
-  { href: '/admin/matches/new', label: 'Log match', match: '/admin/matches' },
   { href: '/admin/tournaments/new', label: 'Tournament', match: '/admin/tournaments' },
   { href: '/admin/history', label: 'History', match: '/admin/history' },
 ]

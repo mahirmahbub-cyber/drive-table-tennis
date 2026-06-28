@@ -3,7 +3,6 @@ import { rebuildElo } from '@/app/actions/matches'
 import { PostToSlackButtons } from '@/components/admin/post-to-slack-buttons'
 
 const links = [
-  { href: '/admin/matches/new', title: 'Log a match', desc: 'Record a game with a live stopwatch' },
   { href: '/admin/history', title: 'Match history', desc: 'Search, filter, edit, and delete matches' },
   { href: '/admin/players', title: 'Players', desc: 'Edit profiles and toggle active status' },
   { href: '/admin/tournaments', title: 'Tournaments', desc: 'View, edit results, and delete tournaments' },
