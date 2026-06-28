@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 const variants = {
   gain: 'bg-gain-muted text-gain',
   loss: 'bg-loss-muted text-loss',
-  brass: 'bg-[color-mix(in_srgb,var(--brass)_18%,transparent)] text-brass-deep',
+  brass: 'bg-brass/18 text-brass-deep',
   neutral: 'bg-muted text-ink-muted',
 } as const
 
