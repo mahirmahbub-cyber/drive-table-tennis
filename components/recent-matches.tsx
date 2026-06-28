@@ -3,6 +3,7 @@ import { alias } from 'drizzle-orm/pg-core'
 import { desc, eq, isNotNull } from 'drizzle-orm'
 import { ViewGameButton } from '@/components/view-game-button'
 import { MatchScoreline } from '@/components/match-scoreline'
+import { SectionHeading } from '@/components/scoreboard'
 
 export async function RecentMatches({ limit = 8 }: { limit?: number }) {
   const a = alias(players, 'a')
@@ -27,7 +28,7 @@ export async function RecentMatches({ limit = 8 }: { limit?: number }) {
 
   return (
     <section>
-      <div className="section-header font-display">Recent Results</div>
+      <SectionHeading kicker="Latest" surface="cream">Recent Results</SectionHeading>
       <ul className="rounded-lg border border-border overflow-hidden bg-card">
         {rows.map((r) => {
           const sets = (r.setScores as Array<[number, number]>) ?? []

@@ -1,6 +1,7 @@
 import { TrendingUp, Zap, Flame, Swords, Crown } from 'lucide-react'
 import type { HomeData } from '@/lib/home-data'
 import type { Mover } from '@/lib/stats-engine'
+import { SectionHeading } from '@/components/scoreboard'
 import {
   demolitionOfWeek,
   matchMargin,
@@ -75,10 +76,7 @@ export function ThisWeek({ data, now, movers }: { data: HomeData; now: number; m
 
   return (
     <section>
-      <div className="section-header font-display">
-        This Week
-        <span className="normal-case tracking-normal font-sans font-normal text-muted-foreground/70 ml-1">7d</span>
-      </div>
+      <SectionHeading kicker="7 Days" surface="cream">This Week</SectionHeading>
 
       {highlights.length > 0 && (
         <div className="grid gap-2">
