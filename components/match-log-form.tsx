@@ -43,8 +43,9 @@ export function MatchLogForm({
   const [playedAt, setPlayedAt] = useState<string>(
     initial?.playedAt ? instantToWallClock(initial.playedAt) : ''
   )
-  // Stopwatch auto-starts; focusing the manual-duration field pauses it for good.
-  const [timerRunning, setTimerRunning] = useState(true)
+  // Stopwatch starts paused — the user starts it when the match begins.
+  // Focusing the manual-duration field pauses it for good.
+  const [timerRunning, setTimerRunning] = useState(false)
 
   // New state for Quick/Full mode toggle and score tracking
   const initialSetCount = Math.min(7, Math.max(1, initial?.sets.length ?? 1))
@@ -111,7 +112,7 @@ export function MatchLogForm({
         setSavedTick((t) => t + 1)
         setDuration(0)
         setDurationText('')
-        setTimerRunning(true)
+        setTimerRunning(false)
         setPlayedAt(instantToWallClock(new Date()))
         setScores(Array.from({ length: 7 }, () => ['', '']))
         setSetCount(1)

@@ -3,10 +3,7 @@ import { PixelRally } from '@/components/pixel-rally'
 import { InlineLogger } from '@/components/inline-logger'
 import { Leaderboard } from '@/components/leaderboard'
 import { RecentMatches } from '@/components/recent-matches'
-import { JoinCta } from '@/components/join-cta'
-import { SuperlativesStrip } from '@/components/home/superlatives-strip'
-import { RivalryWatch } from '@/components/home/rivalry-watch'
-import { ByTheNumbers } from '@/components/home/by-the-numbers'
+import { ThisWeek } from '@/components/home/this-week'
 import { H2hBanner } from '@/components/home/h2h-banner'
 import { loadHomeData } from '@/lib/home-data'
 import { movers, playerAggregates, giantKills, rankWithin, recentlyActive } from '@/lib/stats-engine'
@@ -43,8 +40,9 @@ export default async function HomePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6">
       <H2hBanner />
+
       {/* ── Hero ── */}
-      <section className="mb-10 overflow-hidden rounded-xl border border-border bg-linear-to-br from-secondary to-card">
+      <section className="mb-8 overflow-hidden rounded-xl border border-border bg-linear-to-br from-secondary to-card">
         <div className="grid items-center gap-6 p-6 md:grid-cols-[1fr_1.1fr] md:p-8">
           <div>
             <p className="font-display uppercase tracking-[0.2em] text-xs text-primary mb-2">
@@ -80,23 +78,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Logger (centered) ── */}
-      <div className="mx-auto mb-8 w-full max-w-2xl">
-        <InlineLogger />
+      {/* ── Logger (most prominent) + weekly sidebar ── */}
+      <div className="mb-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div className="min-w-0">
+          <InlineLogger />
+        </div>
+        <div className="min-w-0">
+          <ThisWeek data={data} now={now} movers={weekMovers} />
+        </div>
       </div>
 
-      {/* ── Championship HQ: wide on lg, stacked on mobile ── */}
-      <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-8 min-w-0">
-          <SuperlativesStrip data={data} now={now} movers={weekMovers} />
-          <Leaderboard players={leaderboardPlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
-          <RecentMatches />
-        </div>
-        <div className="space-y-8 min-w-0">
-          <ByTheNumbers data={data} now={now} />
-          <RivalryWatch data={data} now={now} />
-          <JoinCta />
-        </div>
+      {/* ── Ladder (full width) ── */}
+      <Leaderboard players={leaderboardPlayers} movers={weekMovers} wlById={data.wlById} titles={titleByPlayer} />
+
+      {/* ── Recent results (full width) ── */}
+      <div className="mt-8">
+        <RecentMatches />
       </div>
     </main>
   )

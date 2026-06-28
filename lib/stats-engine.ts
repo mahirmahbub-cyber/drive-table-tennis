@@ -244,6 +244,17 @@ export function giantKills(all: EngineMatch[], playerId: string, gap = 100): num
   return n
 }
 
+/** Count of decisive losses for `playerId` within the window (ties excluded). */
+export function lossesInWindow(all: EngineMatch[], playerId: string, since: Date): number {
+  let n = 0
+  for (const m of inWindow(all, since)) {
+    if (m.winnerId == null) continue
+    const played = m.playerAId === playerId || m.playerBId === playerId
+    if (played && m.winnerId !== playerId) n++
+  }
+  return n
+}
+
 // ── Digest / activity helpers ──────────────────────────────────────────────────
 
 /** Matches whose playedAt falls in [start, end). */

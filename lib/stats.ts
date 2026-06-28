@@ -67,6 +67,15 @@ export function formatDuration(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
+/** Coarse duration as "3h 20min" (or "44min" under an hour, "3h" on the hour). */
+export function formatHoursMinutes(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h === 0) return `${m}min`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}min`
+}
+
 /** Accepts "mm:ss" or a plain seconds string. Returns total seconds, or null if invalid/empty. */
 export function parseDurationInput(input: string): number | null {
   const trimmed = input.trim()
