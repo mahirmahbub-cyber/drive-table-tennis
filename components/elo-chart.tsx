@@ -39,24 +39,24 @@ export function EloChart({ data }: { data: Point[] }) {
         />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
+          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-ibm-plex-mono)' }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           domain={['dataMin - 30', 'dataMax + 30']}
-          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
+          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-ibm-plex-mono)' }}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip
           contentStyle={{
-            background: '#ffffff',
+            background: 'var(--card)',
             border: '1px solid var(--border)',
             borderRadius: '8px',
             fontSize: '12px',
             fontFamily: 'var(--font-ibm-plex-mono)',
-            color: '#161616',
+            color: 'var(--foreground)',
           }}
           cursor={{ stroke: 'var(--chart-1)', strokeWidth: 1, strokeOpacity: 0.4 }}
         />

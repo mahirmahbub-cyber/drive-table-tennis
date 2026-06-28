@@ -22,22 +22,22 @@ export function H2hEloChart({ data, p1First }: { data: EloSwingPoint[]; p1First:
           dataKey="matchIndex"
           axisLine={false}
           tickLine={false}
-          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
+          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-ibm-plex-mono)' }}
         />
         <YAxis
           domain={['dataMin - 10', 'dataMax + 10']}
           axisLine={false}
           tickLine={false}
-          tick={{ fontSize: 10, fill: '#5f5f5f', fontFamily: 'var(--font-ibm-plex-mono)' }}
+          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-ibm-plex-mono)' }}
         />
         <Tooltip
           contentStyle={{
-            background: '#ffffff',
+            background: 'var(--card)',
             border: '1px solid var(--border)',
             borderRadius: '8px',
             fontSize: '12px',
             fontFamily: 'var(--font-ibm-plex-mono)',
-            color: '#161616',
+            color: 'var(--foreground)',
           }}
           cursor={{ stroke: 'var(--chart-1)', strokeWidth: 1, strokeOpacity: 0.4 }}
           formatter={(value) => {
