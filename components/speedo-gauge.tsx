@@ -50,9 +50,9 @@ export function SpeedoGauge({
       <svg viewBox="0 0 200 200" width={dim} height={dim} className="overflow-visible">
         <defs>
           <linearGradient id="speedo-arc" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#2960c5" />
-            <stop offset="60%" stopColor="#3b97fa" />
-            <stop offset="100%" stopColor="#ff5e55" />
+            <stop offset="0%" style={{ stopColor: 'var(--chart-1)' }} />
+            <stop offset="60%" style={{ stopColor: 'var(--chart-2)' }} />
+            <stop offset="100%" style={{ stopColor: 'var(--chart-3)' }} />
           </linearGradient>
         </defs>
 

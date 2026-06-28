@@ -16,8 +16,8 @@ export function H2hEloChart({ data, p1First }: { data: EloSwingPoint[]; p1First:
   return (
     <ResponsiveContainer width="100%" height={180}>
       <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid strokeDasharray="1 4" vertical={false} stroke="#e3e3e5" />
-        <ReferenceLine y={0} stroke="#cfcfcf" strokeDasharray="4 4" />
+        <CartesianGrid strokeDasharray="1 4" vertical={false} stroke="var(--border)" />
+        <ReferenceLine y={0} stroke="var(--input)" strokeDasharray="4 4" />
         <XAxis
           dataKey="matchIndex"
           axisLine={false}
@@ -33,13 +33,13 @@ export function H2hEloChart({ data, p1First }: { data: EloSwingPoint[]; p1First:
         <Tooltip
           contentStyle={{
             background: '#ffffff',
-            border: '1px solid #e3e3e5',
+            border: '1px solid var(--border)',
             borderRadius: '8px',
             fontSize: '12px',
             fontFamily: 'var(--font-ibm-plex-mono)',
             color: '#161616',
           }}
-          cursor={{ stroke: '#2960c5', strokeWidth: 1, strokeOpacity: 0.4 }}
+          cursor={{ stroke: 'var(--chart-1)', strokeWidth: 1, strokeOpacity: 0.4 }}
           formatter={(value) => {
             const v = value as number
             return [`${v > 0 ? '+' : ''}${v}`, `Cumulative (${p1First})`] as [string, string]
@@ -52,10 +52,10 @@ export function H2hEloChart({ data, p1First }: { data: EloSwingPoint[]; p1First:
         <Line
           type="monotone"
           dataKey="cumulativeDelta"
-          stroke="#2960c5"
+          stroke="var(--chart-1)"
           strokeWidth={2}
-          dot={{ r: 3, fill: '#2960c5', strokeWidth: 0 }}
-          activeDot={{ r: 5, fill: '#2960c5', strokeWidth: 0 }}
+          dot={{ r: 3, fill: 'var(--chart-1)', strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: 'var(--chart-1)', strokeWidth: 0 }}
           isAnimationActive={false}
         />
       </LineChart>

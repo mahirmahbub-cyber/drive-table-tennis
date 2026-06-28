@@ -9,12 +9,12 @@ export function LogoMark() {
       aria-hidden
       style={{ shapeRendering: 'crispEdges' as const }}
     >
-      <rect x={2} y={2} width={28} height={28} rx={6} fill="#2960c5" />
+      <rect x={2} y={2} width={28} height={28} rx={6} className="fill-ink" />
       {/* paddle blade */}
       <rect x={9} y={7} width={11} height={13} rx={2} fill="#ffffff" />
-      <rect x={12} y={19} width={4} height={7} rx={1} fill="#10489e" />
+      <rect x={12} y={19} width={4} height={7} rx={1} className="fill-brass-deep" />
       {/* ball */}
-      <rect x={21} y={9} width={5} height={5} rx={1} fill="#ff5e55" />
+      <rect x={21} y={9} width={5} height={5} rx={1} className="fill-brass" />
     </svg>
   )
 }

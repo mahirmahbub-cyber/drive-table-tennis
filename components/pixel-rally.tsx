@@ -1,11 +1,11 @@
 // Looping pixel-art table-tennis rally for the home hero.
 // Pure SVG + CSS keyframes (defined in globals.css). No client JS.
 
-function Paddle({ x, color, className }: { x: number; color: string; className: string }) {
+function Paddle({ x, fillClass, className }: { x: number; fillClass: string; className: string }) {
   return (
     <g className={className}>
       {/* blade */}
-      <rect x={x} y={44} width={20} height={30} rx={3} fill={color} />
+      <rect x={x} y={44} width={20} height={30} rx={3} className={fillClass} />
       <rect x={x + 4} y={48} width={6} height={8} fill="#ffffff" opacity={0.35} />
       {/* handle */}
       <rect x={x + 6} y={72} width={8} height={18} rx={2} fill="#161616" />
@@ -29,7 +29,7 @@ export function PixelRally() {
       {/* net */}
       <rect x={158} y={72} width={4} height={24} fill="#a7a7a7" />
       {[74, 80, 86, 92].map((y) => (
-        <rect key={y} x={157} y={y} width={6} height={2} fill="#cfcfcf" />
+        <rect key={y} x={157} y={y} width={6} height={2} className="[fill:var(--input)]" />
       ))}
 
       {/* road-lane dashes along the base — a nod to Drive */}
@@ -37,15 +37,15 @@ export function PixelRally() {
         <rect key={x} x={x} y={110} width={20} height={4} fill="var(--border)" />
       ))}
 
-      <Paddle x={30} color="#2960c5" className="rally-paddle-l" />
-      <Paddle x={270} color="#ff5e55" className="rally-paddle-r" />
+      <Paddle x={30} fillClass="fill-ink" className="rally-paddle-l" />
+      <Paddle x={270} fillClass="fill-brass" className="rally-paddle-r" />
 
       {/* ball: outer group sweeps X, middle group arcs Y (gravity), inner group squashes on impact */}
       <g className="rally-ball-x">
         <g className="rally-ball-y">
           {/* trail ghosts — strongest at mid-flight, where the ball moves fastest */}
-          <rect className="rally-trail" x={40} y={84} width={6} height={6} fill="#3b97fa" />
-          <rect className="rally-trail" x={46} y={84} width={6} height={6} fill="#3b97fa" opacity={0.4} />
+          <rect className="rally-trail [fill:var(--chart-2)]" x={40} y={84} width={6} height={6} />
+          <rect className="rally-trail [fill:var(--chart-2)]" x={46} y={84} width={6} height={6} opacity={0.4} />
           {/* ball */}
           <g className="rally-ball-squash">
             <rect x={52} y={82} width={9} height={9} rx={1} fill="#ffffff" stroke="#161616" strokeWidth={1.5} />
