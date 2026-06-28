@@ -2,7 +2,6 @@ import { TrendingUp, Zap, Flame, Swords, Crown } from 'lucide-react'
 import type { HomeData } from '@/lib/home-data'
 import type { Mover } from '@/lib/stats-engine'
 import {
-  participation,
   demolitionOfWeek,
   matchMargin,
   upsetOfWeek,
@@ -11,7 +10,6 @@ import {
   lossesInWindow,
 } from '@/lib/stats-engine'
 import { SUPERLATIVE_LABELS } from '@/lib/banter'
-import { formatHoursMinutes } from '@/lib/stats'
 
 const WINDOW_DAYS = 7
 
@@ -23,7 +21,6 @@ export function ThisWeek({ data, now, movers }: { data: HomeData; now: number; m
   const since = new Date(now - WINDOW_DAYS * 86400 * 1000)
   const name = (id: string | null | undefined) => (id ? data.nameById.get(id)?.name : undefined) ?? '—'
 
-  const part = participation(data.engineMatches, data.activePlayers.map((p) => p.id), since)
   const demo = demolitionOfWeek(data.engineMatches, since)
   const upset = upsetOfWeek(data.engineMatches, since)
   const topMover = movers[0]
@@ -76,14 +73,6 @@ export function ThisWeek({ data, now, movers }: { data: HomeData; now: number; m
       : null,
   ].filter(Boolean) as { icon: typeof TrendingUp; label: string; value: string; sub: string }[]
 
-  // Secondary raw numbers — shown as compact pills.
-  const stats = [
-    { label: 'Games', value: String(part.games) },
-    { label: 'Court time', value: part.totalCourtSeconds > 0 ? formatHoursMinutes(part.totalCourtSeconds) : '—' },
-    { label: 'Turnout', value: `${part.rate}%` },
-    { label: 'Biggest margin', value: demo ? `${matchMargin(demo)} pts` : '—' },
-  ]
-
   return (
     <section>
       <div className="section-header font-display">
@@ -105,20 +94,6 @@ export function ThisWeek({ data, now, movers }: { data: HomeData; now: number; m
           ))}
         </div>
       )}
-
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="flex items-center justify-between gap-2 rounded-full border border-border bg-card px-3 py-1.5"
-          >
-            <span className="min-w-0 truncate font-display uppercase tracking-widest text-[9px] text-muted-foreground">
-              {s.label}
-            </span>
-            <span className="shrink-0 text-xs font-semibold nums">{s.value}</span>
-          </div>
-        ))}
-      </div>
     </section>
   )
 }
