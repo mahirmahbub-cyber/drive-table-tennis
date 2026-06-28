@@ -85,7 +85,7 @@ export function RaceResult({ result, onLogAnother }: { result: LogResult; onLogA
           const delta = p.after - p.before
           return (
             <div key={p.name} className="flex flex-col items-center gap-1.5">
-              <div className="panel p-2">
+              <div className="rounded-xl bg-linear-to-b from-panel-raised to-panel p-2 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
                 <FlipNumber from={p.before} to={p.after} durationMs={1000} />
               </div>
               <div className="max-w-[170px] text-center font-display text-[11px] uppercase leading-tight tracking-widest text-muted-foreground">

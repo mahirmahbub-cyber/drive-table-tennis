@@ -79,7 +79,7 @@ export function FlipPad({
   const tagB = wonSide === 'B' ? 'won' : gp.b ? 'point' : null
 
   return (
-    <div className="flex flex-col items-center gap-3 panel px-3 pt-4 pb-4">
+    <div className="flex flex-col items-center gap-3 rounded-[13px] bg-linear-to-b from-panel-raised to-panel px-3 pt-4 pb-4 shadow-[0_5px_12px_rgba(0,0,0,0.22)]">
       <div className="grid grid-cols-[auto_auto_auto] justify-center justify-items-center gap-x-3 gap-y-1.5">
         {/* Row 1 — player pickers */}
         <PlayerLabelSelect players={players} value={aId} exclude={bId} onChange={onA} />
