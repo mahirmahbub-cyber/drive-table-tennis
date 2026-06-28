@@ -29,7 +29,7 @@ const ADMIN_NAV = [
 ]
 
 const ADMIN_PILL =
-  'rounded-md border border-border px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-widest text-muted-foreground'
+  'rounded-md border border-panel-line px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-widest text-panel-muted'
 
 export function AdminNav() {
   const pathname = usePathname()
@@ -43,7 +43,7 @@ export function AdminNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">
+    <header className="sticky top-0 z-30 border-b border-black bg-panel text-panel-foreground">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link href="/" className="group flex items-center gap-2.5">
@@ -75,14 +75,14 @@ export function AdminNav() {
             )
           })}
 
-          <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
+          <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-panel-line" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 aria-label="Account menu"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
               >
                 <CircleUser className="h-5 w-5" />
               </button>
@@ -109,7 +109,7 @@ export function AdminNav() {
               <button
                 type="button"
                 aria-label="Open menu"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -119,11 +119,11 @@ export function AdminNav() {
               <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 xl:hidden" />
               <Dialog.Content
                 aria-describedby={undefined}
-                className="fixed inset-0 z-50 flex flex-col bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 xl:hidden"
+                className="fixed inset-0 z-50 flex flex-col bg-panel text-panel-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 xl:hidden"
               >
                 <Dialog.Title className="sr-only">Admin menu</Dialog.Title>
 
-                <div className="flex h-14 items-center justify-between border-b border-border px-4">
+                <div className="flex h-14 items-center justify-between border-b border-black px-4">
                   <Link
                     href="/"
                     className="flex items-center gap-2.5"
@@ -137,7 +137,7 @@ export function AdminNav() {
                   </Link>
                   <Dialog.Close
                     aria-label="Close menu"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
                   >
                     <X className="h-5 w-5" />
                   </Dialog.Close>

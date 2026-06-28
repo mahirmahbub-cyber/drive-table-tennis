@@ -45,7 +45,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">
+    <header className="sticky top-0 z-30 border-b border-black bg-panel text-panel-foreground">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 md:px-6">
         <Link href="/" className="group flex items-center gap-2.5">
           <LogoMark />
@@ -103,7 +103,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
+          <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-panel-line" />
 
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -111,7 +111,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                 <button
                   type="button"
                   aria-label="Account menu"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
                 >
                   <CircleUser className="h-5 w-5" />
                 </button>
@@ -141,7 +141,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
             <Link
               href="/join"
-              className="rounded-md bg-primary px-3.5 py-1.5 font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
+              className="rounded-md bg-primary px-3.5 py-1.5 font-medium text-primary-foreground transition-colors duration-150 hover:brightness-105"
             >
               Join
             </Link>
@@ -152,7 +152,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
           <a
             href="/#log"
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1.5 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-secondary"
+            className="inline-flex items-center gap-1 rounded-md border border-panel-line bg-panel-raised px-2.5 py-1.5 text-sm font-medium text-panel-foreground transition-colors duration-150 hover:text-brass"
           >
             <Plus className="h-3.5 w-3.5" />
             Log a game
@@ -163,7 +163,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
               <button
                 type="button"
                 aria-label="Open menu"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -173,11 +173,11 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
               <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 xl:hidden" />
               <Dialog.Content
                 aria-describedby={undefined}
-                className="fixed inset-0 z-50 flex flex-col bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 xl:hidden"
+                className="fixed inset-0 z-50 flex flex-col bg-panel text-panel-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 xl:hidden"
               >
                 <Dialog.Title className="sr-only">Menu</Dialog.Title>
 
-                <div className="flex h-14 items-center justify-between border-b border-border px-4">
+                <div className="flex h-14 items-center justify-between border-b border-black px-4">
                   <Link
                     href="/"
                     className="flex items-center gap-2.5"
@@ -190,7 +190,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                   </Link>
                   <Dialog.Close
                     aria-label="Close menu"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md text-panel-muted transition-colors duration-150 hover:bg-panel-raised hover:text-panel-foreground"
                   >
                     <X className="h-5 w-5" />
                   </Dialog.Close>
@@ -212,7 +212,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                     )
                   })}
 
-                  <p className="px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <p className="px-4 pb-1 pt-3 text-xs font-medium uppercase tracking-wider text-panel-muted">
                     Tools
                   </p>
                   {TOOLS_NAV.map((item) => {
@@ -269,11 +269,11 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                   )}
                 </nav>
 
-                <div className="border-t border-border p-4">
+                <div className="border-t border-black p-4">
                   <Link
                     href="/join"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground transition-colors duration-150 hover:bg-[#10489e]"
+                    className="flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-base font-medium text-primary-foreground transition-colors duration-150 hover:brightness-105"
                   >
                     Join
                   </Link>

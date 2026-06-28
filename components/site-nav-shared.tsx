@@ -27,14 +27,14 @@ export function navLinkClass(active: boolean) {
   return clsx(
     'rounded-md px-2.5 py-1.5 transition-colors duration-150 xl:px-3',
     active
-      ? 'text-primary font-medium bg-secondary'
-      : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+      ? 'text-brass font-medium bg-panel-raised'
+      : 'text-panel-muted hover:text-brass hover:bg-panel-raised',
   )
 }
 
 export function mobileNavLinkClass(active: boolean) {
   return clsx(
     'rounded-lg px-4 py-3 font-medium transition-colors duration-150',
-    active ? 'bg-secondary text-primary' : 'text-foreground hover:bg-muted',
+    active ? 'bg-panel-raised text-brass' : 'text-panel-muted hover:text-brass hover:bg-panel-raised',
   )
 }
