@@ -32,6 +32,7 @@
   --color-gain: var(--gain);
   --color-gain-muted: var(--gain-muted);
   --color-loss: var(--loss);
+  --color-loss-muted: var(--loss-muted);
 
   /* ── Vintage scoreboard surfaces ── */
   --color-paper: var(--paper);
@@ -72,7 +73,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
 
-  /* ── Typography (Drive brand: IBM Plex family) ── */
+  /* ── Typography — IBM Plex body/mono, Zilla Slab display ── */
   --font-sans: var(--font-ibm-plex-sans);
   --font-mono: var(--font-ibm-plex-mono);
   --font-display: var(--font-zilla-slab);
