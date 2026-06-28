@@ -3,6 +3,7 @@ import {
   IBM_Plex_Sans,
   IBM_Plex_Sans_Condensed,
   IBM_Plex_Mono,
+  Zilla_Slab,
 } from "next/font/google";
 import "./globals.css";
 
@@ -27,6 +28,13 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const zillaSlab = Zilla_Slab({
+  variable: "--font-zilla-slab",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Drive Table Tennis",
   description: "Office table tennis ladder and tournament tracker at Drive.com.au",
@@ -40,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexCondensed.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexCondensed.variable} ${plexMono.variable} ${zillaSlab.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
