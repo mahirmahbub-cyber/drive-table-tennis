@@ -93,7 +93,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <Link
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
-                      className={clsx(active && 'text-primary font-medium')}
+                      className={clsx(active && 'text-ink font-medium bg-accent')}
                     >
                       {item.label}
                     </Link>
@@ -152,7 +152,7 @@ export function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- intentional plain anchor: in-page #log scroll, avoids client-route round-trip */}
           <a
             href="/#log"
-            className="inline-flex items-center gap-1 rounded-md border border-panel-line bg-panel-raised px-2.5 py-1.5 text-sm font-medium text-panel-foreground transition-colors duration-150 hover:text-brass"
+            className="inline-flex items-center gap-1 rounded-md border border-panel-line bg-panel-raised px-2.5 py-1.5 text-sm font-medium text-panel-foreground transition-colors duration-150 hover:text-brass hover:brightness-110"
           >
             <Plus className="h-3.5 w-3.5" />
             Log a game
