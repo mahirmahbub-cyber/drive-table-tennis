@@ -228,6 +228,9 @@ themeable. The cool blue-greys (`#9aa3b2`, `#cfd2d8`) move to the warm `--panel-
 - **Charts** — confirm the charting lib (`elo-chart`, `h2h-elo-chart`, in-form sparkline,
   `speedo-gauge`, `animated-dial`) reads the CSS-var chart tokens; update any hardcoded
   series colours.
+- **Colour policy** — component code references colours only through tokens (`var(--token)`
+  or Tailwind `fill-*`/`stroke-*`/`text-*` token utilities). Raw hex literals live solely in
+  `:root` of `globals.css`; the only exception is neutral black/white alpha values in shadows.
 
 ## Implementation Approach
 

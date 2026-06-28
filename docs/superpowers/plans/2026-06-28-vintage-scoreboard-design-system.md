@@ -12,6 +12,8 @@
 
 **Reference spec:** `docs/superpowers/specs/2026-06-28-vintage-scoreboard-design-system-design.md`
 
+**Colour policy (applies to every task):** Component code must reference colours through tokens — either a Tailwind token utility (`text-brass`, `bg-cream`, `fill-ink`, `stroke-chart-1`, `border-panel-line`) or `var(--token)` (for Recharts / SVG colour props that take a string). Never replace one hardcoded hex with another. Raw hex literals live **only** in `:root` of `app/globals.css`. The sole exception is neutral black/white alpha values inside shadows where no token exists (e.g. `inset 0 -4px 0 rgb(0 0 0 / 0.05)`). Tailwind v4 generates `fill-*`/`stroke-*`/`text-*`/`bg-*` utilities from the `--color-*` tokens added in Task 2, so token utilities exist for every brand colour.
+
 ---
 
 ## File Structure
@@ -603,36 +605,47 @@ git commit -m "refactor: flip components consume design tokens"
 
 ---
 
-## Task 7: Remap hardcoded chart, gauge, and logo hexes
+## Task 7: Remap hardcoded chart, gauge, and logo hexes to tokens
 
 **Files:**
 - Modify: `components/elo-chart.tsx`, `components/home/h2h-elo-chart.tsx`, `components/speedo-gauge.tsx`, `components/pixel-rally.tsx`, `components/site-nav-shared.tsx`, `components/animated-dial.tsx`
 
-Recharts series colours are passed as literal props, so tokens won't reach them — edit the literals. Mapping: `#2960c5` → `#e0a92a` (brass, primary series); `#3b97fa` → `#3f7d4f` (gain green, secondary series); `#ff5e55` → `#c0553b` (terracotta); `#10489e` → `#1b1d22` (ink); grid `#e3e3e5` → `#e3d6ad`; `#cfcfcf` reference line → `#c9b98a`.
+Per the colour policy, replace every brand hex with a `var(--token)` reference or a Tailwind token utility — **do not swap one hex for another**. Recharts colour props accept `var(--token)` strings; for direct SVG presentation, prefer a Tailwind utility (`fill-ink`, `fill-brass`) or a `[fill:var(--token)]` arbitrary-property class (real CSS, so it resolves everywhere) over a raw `fill="#..."` attribute. The chart tokens `--chart-1..5` are already mapped into `@theme` (so `stroke-chart-1` etc. also exist); grid/reference greys reuse the existing `--border` and `--input` tokens.
+
+Token map for this task:
+
+| Old literal | New reference |
+| --- | --- |
+| `#2960c5` (primary series / stroke / dot) | `var(--chart-1)` (brass) |
+| `#3b97fa` (secondary series) | `var(--chart-2)` (gain green) |
+| `#ff5e55` (counter series) | `var(--chart-3)` (terracotta) |
+| `#10489e` (deep) | `var(--brass-deep)` / `fill-brass-deep` |
+| grid `#e3e3e5` | `var(--border)` |
+| reference / faint `#cfcfcf` | `var(--input)` |
 
 - [ ] **Step 1: elo-chart.tsx**
 
-Replace `stroke="#2960c5"` → `stroke="#e0a92a"`, the cursor `stroke: '#2960c5'` → `'#e0a92a'`, grid `stroke="#e3e3e5"` → `"#e3d6ad"`, reference `stroke="#cfcfcf"` → `"#c9b98a"`, and any `fill="#2960c5"` dots → `fill="#e0a92a"`.
+Replace `stroke="#2960c5"` → `stroke="var(--chart-1)"`, the cursor `stroke: '#2960c5'` → `'var(--chart-1)'`, grid `stroke="#e3e3e5"` → `"var(--border)"`, reference `stroke="#cfcfcf"` → `"var(--input)"`, and any `fill="#2960c5"` dots → `fill="var(--chart-1)"`.
 
 - [ ] **Step 2: h2h-elo-chart.tsx**
 
-Same mapping: `#2960c5` (stroke/cursor/dot/activeDot fill) → `#e0a92a`; grid `#e3e3e5` → `#e3d6ad`; reference `#cfcfcf` → `#c9b98a`. If the chart plots two players, give the second series `#3f7d4f` (gain green) so the two lines stay distinguishable — check the component for a second `<Line>`/`stroke` and set it.
+Same: `#2960c5` (stroke/cursor/dot/activeDot fill) → `var(--chart-1)`; grid `#e3e3e5` → `var(--border)`; reference `#cfcfcf` → `var(--input)`. If the chart plots two players, give the second series `var(--chart-2)` (gain green) so the two lines stay distinguishable — check the component for a second `<Line>`/`stroke` and set it.
 
 - [ ] **Step 3: speedo-gauge.tsx**
 
-Gradient stops: `#2960c5` → `#e0a92a`, `#3b97fa` → `#3f7d4f`, `#ff5e55` → `#c0553b`.
+Gradient stops: `stopColor="#2960c5"` → `stopColor="var(--chart-1)"`, `#3b97fa` → `var(--chart-2)`, `#ff5e55` → `var(--chart-3)`. Verify the gradient renders after the change; if a browser ignores `var()` inside the `stop-color` attribute, set it via style instead: `style={{ stopColor: 'var(--chart-1)' }}`.
 
 - [ ] **Step 4: pixel-rally.tsx (logo animation)**
 
-`color="#2960c5"` (left paddle) → `"#1b1d22"` (ink), `color="#ff5e55"` (right paddle) → `"#e0a92a"` (brass), trail `fill="#3b97fa"` → `"#c9b98a"`.
+This threads colour through a `color` prop into `Paddle`. Change `Paddle` to accept a `className` and apply a `fill-*` utility instead of a hex `fill`/`color`, then pass `fill-ink` (left paddle, was `#2960c5`) and `fill-brass` (right paddle, was `#ff5e55`). For the trail rects, replace `fill="#3b97fa"` with `className="[fill:var(--chart-2)]"`, keeping their existing animation/opacity classes.
 
 - [ ] **Step 5: site-nav-shared.tsx (logo SVG)**
 
-`fill="#2960c5"` → `"#1b1d22"`, `fill="#10489e"` → `"#a97c14"` (brass-deep), `fill="#ff5e55"` → `"#e0a92a"` (brass).
+Drop the `fill="#..."` attributes and use Tailwind token utilities on the `<rect>`s: `#2960c5` → `fill-ink`, `#10489e` → `fill-brass-deep`, `#ff5e55` → `fill-brass`.
 
 - [ ] **Step 6: animated-dial.tsx**
 
-Run `rg -n '#[0-9a-fA-F]{6}' components/animated-dial.tsx` and remap any blue/coral literals per the mapping table. If none, skip.
+Run `rg -n '#[0-9a-fA-F]{6}' components/animated-dial.tsx` and remap any blue/coral literals to `var(--token)` / token utilities per the map (e.g. `var(--chart-1)`). If none, skip.
 
 - [ ] **Step 7: Typecheck + lint + visual**
 
@@ -842,8 +855,11 @@ These inherit tokens only — no bespoke panels. The job is to confirm they read
 
 - [ ] **Step 1: Sweep for residual brand literals**
 
-Run: `rg -n '#2960c5|#10489e|#3b97fa|#ff5e55|#c7301f|#eef3fc|text-blue|bg-blue|hover:bg-\[#10489e\]' app components | rg -v node_modules`
-Replace every remaining hit with the token equivalent (`bg-primary`/`text-brass`/`text-gain`/`text-loss`/`text-ink-muted`). The `join-form.tsx` `hover:bg-[#10489e]` → `hover:brightness-105`.
+Run the named-colour sweep:
+`rg -n '#2960c5|#10489e|#3b97fa|#ff5e55|#c7301f|#eef3fc|text-blue|bg-blue|hover:bg-\[#10489e\]' app components | rg -v node_modules`
+Then the catch-all literal sweep (arbitrary classes + SVG attributes):
+`rg -n 'text-\[#|bg-\[#|border-\[#|ring-\[#|fill="#|stroke="#|stopColor="#|color="#' app components | rg -v node_modules`
+Replace every hit with a token utility or `var(--token)` (`bg-primary`/`text-brass`/`text-gain`/`text-loss`/`text-ink-muted`/`fill-ink`). The `join-form.tsx` `hover:bg-[#10489e]` → `hover:brightness-105`. Per the colour policy, the only acceptable remaining literals are in `app/globals.css :root` and neutral black/white alpha shadow values — confirm nothing else survives.
 
 - [ ] **Step 2: Visual contrast pass**
 
@@ -895,4 +911,5 @@ git commit -m "chore: finalise vintage scoreboard design system"
 
 - **Spec coverage:** Tokens (Task 2) ✓; slab font (Task 1) ✓; primitives (Tasks 3–4) ✓; new components (Task 5) ✓; flip reconciliation (Task 6) ✓; charts/gauge/logo remap (Task 7) ✓; chrome (Task 8) ✓; bespoke public surfaces — home/players/matches/matrix/tournaments (Tasks 9–13) ✓; inherit-only utility + admin (Task 14) ✓; contrast + reduced-motion + fonts gotchas (Tasks 12/14/15) ✓; out-of-scope dark mode honoured (never added). 
 - **Two-tuning semantics:** panel surfaces use `-strong`, cream surfaces use base — applied consistently in Tasks 9–13.
+- **Colour policy:** every component-level brand colour routes through a token utility or `var(--token)` (Tasks 6–14, esp. the chart/SVG remap in Task 7); literal hexes remain only in `:root` plus neutral shadow alphas, enforced by the Task 14 catch-all sweep.
 - **No automated tests** by project decision; verification is typecheck + lint + dev visual + final build.
