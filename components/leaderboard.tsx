@@ -14,7 +14,7 @@ export function Leaderboard({ players, movers, wlById, titles }: { players: Home
   const moveById = new Map(movers.map((m) => [m.playerId, m.delta] as const))
 
   return (
-    <Panel kicker="Active Grid" title="Starting Grid" rule className="overflow-hidden pb-0 sm:pb-0">
+    <Panel title="Starting Grid" rule className="overflow-hidden pb-0 sm:pb-0">
       {/* Column labels — aligned to match data row right-hand columns */}
       <div className="flex items-center justify-end gap-4 px-3.5 sm:px-4 pb-1.5 text-[10px] text-panel-muted">
         <span className="hidden w-14 text-right sm:block">W–L</span>
