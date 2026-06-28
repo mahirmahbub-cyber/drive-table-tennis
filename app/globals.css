@@ -47,6 +47,7 @@
   --color-panel-muted: var(--panel-muted);
   --color-brass: var(--brass);
   --color-brass-deep: var(--brass-deep);
+  --color-brass-light: var(--brass-light);
   --color-gain-strong: var(--gain-strong);
   --color-loss-strong: var(--loss-strong);
 
@@ -98,6 +99,7 @@
   --panel-muted: #9c958a;
   --brass: #e0a92a;
   --brass-deep: #a97c14;
+  --brass-light: #e7c86a;
   --brass-glow: rgb(231 200 106 / 0.5);
 
   /* Semantic (shadcn-aligned) */

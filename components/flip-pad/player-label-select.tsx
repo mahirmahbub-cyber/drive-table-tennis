@@ -18,7 +18,7 @@ export function PlayerLabelSelect({
   const first = selected ? selected.name.split(' ')[0] : 'Pick'
 
   return (
-    <div className="relative inline-flex max-w-[92px] items-center gap-1 text-[#e7c86a]">
+    <div className="relative inline-flex max-w-[92px] items-center gap-1 text-brass-light">
       <span className="truncate text-xs font-bold uppercase tracking-wide">{first}</span>
       <span aria-hidden className="text-[8px] opacity-70">▼</span>
       <select

@@ -25,7 +25,7 @@ function Chip({
 
   if (editing) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border-2 border-[#e7c86a] bg-card px-2 py-1 font-mono nums text-sm font-bold">
+      <span className="inline-flex items-center gap-1 rounded-md border-2 border-brass-light bg-card px-2 py-1 font-mono nums text-sm font-bold">
         <input
           type="number"
           aria-label="game score left"
