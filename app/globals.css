@@ -167,10 +167,15 @@
     @apply flex items-center gap-3 px-3 py-1.5 border-b border-border last:border-0;
   }
 
+  .base-section-header {
+      @apply font-display uppercase tracking-widest text-xs text-muted-foreground;
+  }
+
   /* Section header — breathes above dense data */
   .section-header {
     @apply font-display uppercase tracking-widest text-xs text-muted-foreground mb-3 pb-1.5 border-b border-border;
   }
+
 }
 
 /* ═══════════════════════════════════════════════

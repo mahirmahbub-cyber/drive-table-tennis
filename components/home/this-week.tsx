@@ -38,38 +38,38 @@ export function ThisWeek({ data, now, movers }: { data: HomeData; now: number; m
       : null,
     upset
       ? {
-          icon: Zap,
-          label: SUPERLATIVE_LABELS.upset,
-          value: name(upset.winnerId),
-          sub: `mogged ${name(upset.winnerId === upset.playerAId ? upset.playerBId : upset.playerAId)}`,
-        }
+        icon: Zap,
+        label: SUPERLATIVE_LABELS.upset,
+        value: name(upset.winnerId),
+        sub: `mogged ${name(upset.winnerId === upset.playerAId ? upset.playerBId : upset.playerAId)}`,
+      }
       : null,
     demo
       ? {
-          icon: Flame,
-          label: SUPERLATIVE_LABELS.demolition,
-          value: name(demo.winnerId),
-          sub: `cooked ${name(demo.winnerId === demo.playerAId ? demo.playerBId : demo.playerAId)} by ${matchMargin(demo)}`,
-        }
+        icon: Flame,
+        label: SUPERLATIVE_LABELS.demolition,
+        value: name(demo.winnerId),
+        sub: `cooked ${name(demo.winnerId === demo.playerAId ? demo.playerBId : demo.playerAId)} by ${matchMargin(demo)}`,
+      }
       : null,
     rivalry
       ? (() => {
-          const h2h = headToHead(data.engineMatches, rivalry.p1, rivalry.p2)
-          const leadP1 = h2h.p1Wins >= h2h.p2Wins
-          const ldr = leadP1 ? rivalry.p1 : rivalry.p2
-          const opponent = leadP1 ? rivalry.p2 : rivalry.p1
-          const lw = leadP1 ? h2h.p1Wins : h2h.p2Wins
-          const ow = leadP1 ? h2h.p2Wins : h2h.p1Wins
-          return { icon: Swords, label: 'Rivalry', value: name(ldr), sub: `${lw}–${ow} vs ${name(opponent)}` }
-        })()
+        const h2h = headToHead(data.engineMatches, rivalry.p1, rivalry.p2)
+        const leadP1 = h2h.p1Wins >= h2h.p2Wins
+        const ldr = leadP1 ? rivalry.p1 : rivalry.p2
+        const opponent = leadP1 ? rivalry.p2 : rivalry.p1
+        const lw = leadP1 ? h2h.p1Wins : h2h.p2Wins
+        const ow = leadP1 ? h2h.p2Wins : h2h.p1Wins
+        return { icon: Swords, label: 'Rivalry', value: name(ldr), sub: `${lw}–${ow} vs ${name(opponent)}` }
+      })()
       : null,
     langford
       ? {
-          icon: Crown,
-          label: `${langford.name} beaten`,
-          value: `${langfordBeaten}x`,
-          sub: langfordBeaten > 0 ? 'get rekt scrub' : 'untouched',
-        }
+        icon: Crown,
+        label: `${langford.name} beaten`,
+        value: `${langfordBeaten}x`,
+        sub: langfordBeaten > 0 ? 'get rekt scrub' : 'untouched',
+      }
       : null,
   ].filter(Boolean) as { icon: typeof TrendingUp; label: string; value: string; sub: string }[]
 
