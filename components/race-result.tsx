@@ -85,7 +85,7 @@ export function RaceResult({ result, onLogAnother }: { result: LogResult; onLogA
           const delta = p.after - p.before
           return (
             <div key={p.name} className="flex flex-col items-center gap-1.5">
-              <div className="rounded-xl bg-linear-to-b from-[#2a2d33] to-[#1b1d22] p-2 shadow-[0_4px_10px_rgba(0,0,0,0.2)]">
+              <div className="panel p-2">
                 <FlipNumber from={p.before} to={p.after} durationMs={1000} />
               </div>
               <div className="max-w-[170px] text-center font-display text-[11px] uppercase leading-tight tracking-widest text-muted-foreground">
@@ -96,7 +96,7 @@ export function RaceResult({ result, onLogAnother }: { result: LogResult; onLogA
               </div>
               <RankBadge before={p.rb} after={p.ra} />
               {p.won && (
-                <span className="rounded-full bg-[#e0a92a] px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-[#1b1d22]">
+                <span className="rounded-full bg-brass px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-ink">
                   Winner
                 </span>
               )}

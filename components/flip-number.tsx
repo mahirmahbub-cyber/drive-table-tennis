@@ -32,15 +32,15 @@ function useCountUp(from: number, to: number, durationMs: number) {
 
 function FlipDigit({ char }: { char: string }) {
   return (
-    <span className="relative grid h-12 w-9 place-items-center overflow-hidden rounded-md bg-[#fdf6e3] shadow-[0_2px_4px_rgba(0,0,0,0.3),inset_0_-4px_0_rgba(0,0,0,0.05)]">
+    <span className="relative grid h-12 w-9 place-items-center overflow-hidden rounded-md bg-cream shadow-[var(--shadow-tile)]">
       {/* Inner span remounts on digit change (key={char}) to replay the flip. */}
       <span
         key={char}
-        className="flip-digit-anim absolute inset-0 grid place-items-center font-mono nums text-3xl font-bold text-[#1b1d22]"
+        className="flip-digit-anim absolute inset-0 grid place-items-center font-mono nums text-3xl font-bold text-ink"
       >
         {char}
       </span>
-      <span className="pointer-events-none absolute inset-x-0 top-1/2 z-10 h-px bg-black/20" aria-hidden />
+      <span className="pointer-events-none absolute inset-x-0 top-1/2 z-10 h-px hinge" aria-hidden />
     </span>
   )
 }

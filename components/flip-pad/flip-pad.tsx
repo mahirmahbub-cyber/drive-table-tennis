@@ -14,7 +14,7 @@ function firstNameFor(players: PlayerOption[], id: string, fallback: string) {
 function TargetSelector({ target, onTarget }: { target: number; onTarget: (n: number) => void }) {
   return (
     <div className="flex w-full items-center justify-center gap-2 ">
-      <span className="font-display text-[10px] uppercase tracking-widest text-[#9aa3b2]">First to</span>
+      <span className="font-display text-[10px] uppercase tracking-widest text-panel-muted">First to</span>
       <div className="inline-flex items-center gap-0.5 rounded-lg bg-black/25 p-0.5">
         {[7, 11, 15, 21].map((n) => (
           <button
@@ -24,8 +24,8 @@ function TargetSelector({ target, onTarget }: { target: number; onTarget: (n: nu
             aria-pressed={target === n}
             onClick={() => onTarget(n)}
             className={`min-w-[30px] rounded-md px-2 py-1 font-mono nums text-sm font-bold transition-colors ${target === n
-              ? 'bg-[#e0a92a] text-[#1b1d22] shadow-sm'
-              : 'text-[#9aa3b2] hover:text-white'
+              ? 'bg-brass text-ink shadow-sm'
+              : 'text-panel-muted hover:text-white'
               }`}
           >
             {n}
@@ -38,7 +38,7 @@ function TargetSelector({ target, onTarget }: { target: number; onTarget: (n: nu
 
 function GamePointTag({ won }: { won: boolean }) {
   return (
-    <span className="pointer-events-none absolute left-1/2 top-0.5 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#e0a92a] px-1.5 py-px text-[8px] font-bold uppercase tracking-[0.1em] text-[#1b1d22] shadow">
+    <span className="pointer-events-none absolute left-1/2 top-0.5 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-brass px-1.5 py-px text-[8px] font-bold uppercase tracking-[0.1em] text-ink shadow">
       {won ? 'Game won' : 'Game point'}
     </span>
   )
@@ -79,7 +79,7 @@ export function FlipPad({
   const tagB = wonSide === 'B' ? 'won' : gp.b ? 'point' : null
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[13px] bg-linear-to-b from-[#2a2d33] to-[#1b1d22] px-3 pt-4 pb-4 shadow-[0_5px_12px_rgba(0,0,0,0.22)]">
+    <div className="flex flex-col items-center gap-3 panel px-3 pt-4 pb-4">
       <div className="grid grid-cols-[auto_auto_auto] justify-center justify-items-center gap-x-3 gap-y-1.5">
         {/* Row 1 — player pickers */}
         <PlayerLabelSelect players={players} value={aId} exclude={bId} onChange={onA} />
@@ -98,9 +98,9 @@ export function FlipPad({
           {tagA && <GamePointTag won={tagA === 'won'} />}
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-0.5 self-stretch text-center text-[9px] uppercase tracking-wider text-[#cfd2d8]">
+        <div className="flex flex-col items-center justify-center gap-0.5 self-stretch text-center text-[9px] uppercase tracking-wider text-panel-muted">
           <span>Games</span>
-          <span className="font-mono nums text-[22px] font-bold leading-none text-white">
+          <span className="font-mono nums text-[22px] font-bold leading-none text-panel-foreground">
             {tallyA}–{tallyB}
           </span>
         </div>
