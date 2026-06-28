@@ -33,6 +33,22 @@
   --color-gain-muted: var(--gain-muted);
   --color-loss: var(--loss);
 
+  /* ── Vintage scoreboard surfaces ── */
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
+  --color-cream-lift: var(--cream-lift);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-panel: var(--panel);
+  --color-panel-raised: var(--panel-raised);
+  --color-panel-line: var(--panel-line);
+  --color-panel-foreground: var(--panel-foreground);
+  --color-panel-muted: var(--panel-muted);
+  --color-brass: var(--brass);
+  --color-brass-deep: var(--brass-deep);
+  --color-gain-strong: var(--gain-strong);
+  --color-loss-strong: var(--loss-strong);
+
   /* ── Chart ── */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -59,60 +75,84 @@
   /* ── Typography (Drive brand: IBM Plex family) ── */
   --font-sans: var(--font-ibm-plex-sans);
   --font-mono: var(--font-ibm-plex-mono);
-  --font-display: var(--font-ibm-plex-condensed);
+  --font-display: var(--font-zilla-slab);
 }
 
 /* ═══════════════════════════════════════════════
-   DRIVE BRAND THEME — light, sourced from drive.com.au
-   Signature blue #2960C5, coral accent, IBM Plex type.
-   "Wins / +ELO / pole" = Drive blue; "losses / -ELO" = coral.
+   VINTAGE SCOREBOARD THEME — warm two-tone.
+   Cream/paper page, charcoal scoreboard panels, brass accents.
+   Ledger semantics: muted green = gain/win, terracotta = loss.
    ═══════════════════════════════════════════════ */
 :root {
-  --background: #f7f7f8;          /* page — warm-neutral off-white */
-  --foreground: #161616;          /* near-black ink */
-  --card: #ffffff;                /* cards pop white against the page */
-  --card-foreground: #161616;
-  --popover: #ffffff;
-  --popover-foreground: #161616;
+  /* Raw palette */
+  --paper: #efe6d0;
+  --cream: #fdf6e3;
+  --cream-lift: #fffaf0;
+  --ink: #1b1d22;
+  --ink-muted: #7a6c4d;
+  --panel: #1b1d22;
+  --panel-raised: #2a2d33;
+  --panel-line: #34383f;
+  --panel-foreground: #f3ede0;
+  --panel-muted: #9c958a;
+  --brass: #e0a92a;
+  --brass-deep: #a97c14;
+  --brass-glow: rgb(231 200 106 / 0.5);
 
-  --primary: #2960c5;             /* Drive blue — CTAs, links, pole */
-  --primary-foreground: #ffffff;
+  /* Semantic (shadcn-aligned) */
+  --background: #efe6d0;
+  --foreground: #1b1d22;
+  --card: #fdf6e3;
+  --card-foreground: #1b1d22;
+  --popover: #fdf6e3;
+  --popover-foreground: #1b1d22;
 
-  --secondary: #eef3fc;           /* pale blue surface */
-  --secondary-foreground: #10489e;
-  --muted: #f0f0f1;               /* neutral muted surface */
-  --muted-foreground: #5f5f5f;
-  --accent: #eef3fc;
-  --accent-foreground: #10489e;
-  --destructive: #d62f24;         /* accessible red for destructive actions */
+  --primary: #e0a92a;
+  --primary-foreground: #1b1d22;
 
-  --border: #e3e3e5;
-  --input: #d6d6d9;
-  --ring: #2960c5;                /* brand-blue focus ring */
+  --secondary: #f3ead2;
+  --secondary-foreground: #7a6c4d;
+  --muted: #ece1c9;
+  --muted-foreground: #7a6c4d;
+  --accent: #f3e6c4;
+  --accent-foreground: #a97c14;
+  --destructive: #c0553b;
 
-  /* Sport accents */
-  --gain: #2960c5;                /* blue = win / +ELO / go */
-  --gain-muted: rgb(41 96 197 / 0.12);
-  --loss: #c7301f;                /* accessible coral-red for -ELO text */
+  --border: #e3d6ad;
+  --input: #d8c9a0;
+  --ring: #e0a92a;
 
-  --radius: 0.5rem;               /* friendlier, modern rounding */
+  /* Ledger semantics — two tunings for contrast on each surface */
+  --gain: #3f7d4f;
+  --gain-strong: #7cc08a;
+  --gain-muted: rgb(63 125 79 / 0.16);
+  --loss: #c0553b;
+  --loss-strong: #e0795f;
+  --loss-muted: rgb(192 85 59 / 0.16);
 
-  /* Charts — Drive blue lead, coral counter, supporting blues + grey */
-  --chart-1: #2960c5;
-  --chart-2: #ff5e55;
-  --chart-3: #3b97fa;
-  --chart-4: #10489e;
-  --chart-5: #a7a7a7;
+  --radius: 0.45rem;
 
-  /* Sidebar */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #161616;
-  --sidebar-primary: #2960c5;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef3fc;
-  --sidebar-accent-foreground: #10489e;
-  --sidebar-border: #e3e3e5;
-  --sidebar-ring: #2960c5;
+  /* Charts — brass lead, ledger green/red, ink + muted */
+  --chart-1: #e0a92a;
+  --chart-2: #3f7d4f;
+  --chart-3: #c0553b;
+  --chart-4: #1b1d22;
+  --chart-5: #9c958a;
+
+  /* Sidebar / nav — charcoal world */
+  --sidebar: #1b1d22;
+  --sidebar-foreground: #f3ede0;
+  --sidebar-primary: #e0a92a;
+  --sidebar-primary-foreground: #1b1d22;
+  --sidebar-accent: #2a2d33;
+  --sidebar-accent-foreground: #e0a92a;
+  --sidebar-border: #000000;
+  --sidebar-ring: #e0a92a;
+
+  /* Tactile shadows */
+  --shadow-panel: 0 5px 12px rgb(0 0 0 / 0.28), inset 0 -6px 0 rgb(0 0 0 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --shadow-key: 0 2px 0 var(--brass-deep), 0 3px 5px rgb(0 0 0 / 0.3);
+  --shadow-tile: 0 2px 4px rgb(0 0 0 / 0.3), inset 0 -4px 0 rgb(0 0 0 / 0.05);
 }
 
 /* ═══════════════════════════════════════════════
@@ -138,11 +178,10 @@
    CUSTOM UTILITIES
    ═══════════════════════════════════════════════ */
 @layer utilities {
-  /* Display / heading font */
+  /* Display / heading font — slab */
   .font-display {
-    font-family: var(--font-display), 'IBM Plex Sans Condensed', ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-display), 'Zilla Slab', Georgia, 'Times New Roman', serif;
     font-feature-settings: "kern" 1, "tnum" 1;
-    letter-spacing: -0.005em;
   }
 
   /* Tabular numerals shorthand */
@@ -151,15 +190,34 @@
     font-feature-settings: "tnum" 1;
   }
 
-  /* Gain colour — Drive blue for positive ΔELO / wins */
-  .text-gain {
-    color: var(--gain);
+  /* Ledger semantics */
+  .text-gain { color: var(--gain); }
+  .text-gain-strong { color: var(--gain-strong); }
+  .text-loss { color: var(--loss); }
+  .text-loss-strong { color: var(--loss-strong); }
+  .bg-gain-muted { background-color: var(--gain-muted); }
+  .bg-loss-muted { background-color: var(--loss-muted); }
+
+  /* Charcoal scoreboard panel */
+  .panel {
+    background-image: linear-gradient(var(--panel-raised), var(--panel));
+    color: var(--panel-foreground);
+    border-radius: var(--radius) var(--radius) calc(var(--radius) + 0.25rem) calc(var(--radius) + 0.25rem);
+    box-shadow: var(--shadow-panel);
   }
-  .bg-gain-muted {
-    background-color: var(--gain-muted);
+  /* Brass divider rule */
+  .brass-rule {
+    height: 2px;
+    background-color: var(--brass);
+    border-radius: 2px;
   }
-  .text-loss {
-    color: var(--loss);
+  /* Split-flap centre seam */
+  .hinge {
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1px;
+    background-color: rgb(0 0 0 / 0.18);
+    pointer-events: none;
   }
 
   /* Tight data row — used in leaderboard, matches */
