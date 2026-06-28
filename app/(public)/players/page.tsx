@@ -66,13 +66,15 @@ export default async function PlayersPage() {
                     {p.bio}
                   </div>
                 )}
-                {(() => { const s = statsById.get(p.id)!; return (
-                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-mono nums text-muted-foreground">
-                    <span><span className="text-gain">{s.wins}</span>W <span className="text-loss">{s.losses}</span>L</span>
-                    <span>{s.games} games</span>
-                    {s.totalPlayingSeconds > 0 && <span>{formatDuration(s.totalPlayingSeconds)} played</span>}
-                  </div>
-                ) })()}
+                {(() => {
+                  const s = statsById.get(p.id)!; return (
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-mono nums text-muted-foreground">
+                      <span><span className="text-gain">{s.wins}</span>W <span className="text-loss">{s.losses}</span>L</span>
+                      <span>{s.games} games</span>
+                      {s.totalPlayingSeconds > 0 && <span>{formatDuration(s.totalPlayingSeconds)} played</span>}
+                    </div>
+                  )
+                })()}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 <SpeedoGauge elo={p.currentElo} size="sm" />

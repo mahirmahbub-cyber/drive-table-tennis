@@ -234,8 +234,27 @@
 .rally-paddle-r { animation: rally-hit-right 2.4s linear infinite; transform-box: fill-box; transform-origin: bottom center; }
 .rally-trail { animation: rally-trail 2.4s linear infinite; }
 
+@keyframes flip-card {
+  0%   { transform: rotateX(-88deg); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+
+.flip-card-anim {
+  animation: flip-card 200ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  transform-origin: top center;
+  backface-visibility: hidden;
+}
+
+/* Faster variant for the result counter — digits flip rapidly as the ELO tallies. */
+.flip-digit-anim {
+  animation: flip-card 150ms ease-out;
+  transform-origin: top center;
+  backface-visibility: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .rally-ball-x, .rally-ball-y, .rally-ball-squash, .rally-paddle-l, .rally-paddle-r, .rally-trail {
+  .rally-ball-x, .rally-ball-y, .rally-ball-squash, .rally-paddle-l, .rally-paddle-r, .rally-trail, .flip-card-anim, .flip-digit-anim {
     animation: none;
   }
 }

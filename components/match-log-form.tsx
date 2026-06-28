@@ -1,13 +1,23 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import { logMatch, editMatch } from '@/app/actions/matches'
 import { LoadingOverlay } from '@/components/loading-overlay'
-import { MatchStopwatch } from '@/components/match-stopwatch'
-import { formatDuration } from '@/lib/stats'
-import { Stepper } from '@/components/stepper'
-import { inferWinnerSide, setsWon, type SetScore } from '@/lib/match-format'
 import { RaceResult } from '@/components/race-result'
+import { FlipPad } from '@/components/flip-pad/flip-pad'
+import { GamesStrip } from '@/components/flip-pad/games-strip'
+import { DurationPill } from '@/components/flip-pad/duration-pill'
+import { PlayedAtLine } from '@/components/flip-pad/played-at-line'
+import {
+  splitForEdit,
+  allGames,
+  tally,
+  matchWinner,
+  canBank,
+  canAddGame,
+  type BankedGame,
+  type LiveGame,
+} from '@/lib/flip-pad'
 import type { LogResult } from '@/app/actions/matches'
 import { instantToWallClock } from '@/lib/tz'
 
@@ -32,65 +42,44 @@ export function MatchLogForm({
   onSuccess?: () => void
 }) {
   const isEdit = !!initial
+  const [editSplit] = useState(() => (initial ? splitForEdit(initial.sets) : null))
+
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [savedTick, setSavedTick] = useState(0)
   const [result, setResult] = useState<LogResult | null>(null)
   const [duration, setDuration] = useState<number>(initial?.durationSeconds ?? 0)
-  const [durationText, setDurationText] = useState<string>(
-    initial?.durationSeconds ? formatDuration(initial.durationSeconds) : ''
-  )
-  const [playedAt, setPlayedAt] = useState<string>(
-    initial?.playedAt ? instantToWallClock(initial.playedAt) : ''
-  )
-  // Stopwatch starts paused — the user starts it when the match begins.
-  // Focusing the manual-duration field pauses it for good.
-  const [timerRunning, setTimerRunning] = useState(false)
+  const [playedAt, setPlayedAt] = useState<string>(initial?.playedAt ? instantToWallClock(initial.playedAt) : '')
 
-  // New state for Quick/Full mode toggle and score tracking
-  const initialSetCount = Math.min(7, Math.max(1, initial?.sets.length ?? 1))
-  const initialMode: 'quick' | 'full' = initial && initial.sets.length > 1 ? 'full' : 'quick'
-  const [mode, setMode] = useState<'quick' | 'full'>(initialMode)
-  const [setCount, setSetCount] = useState(initialSetCount)
-  const [scores, setScores] = useState<Array<[string, string]>>(
-    Array.from({ length: 7 }, (_, i) => [
-      initial?.sets[i]?.[0]?.toString() ?? '',
-      initial?.sets[i]?.[1]?.toString() ?? '',
-    ])
-  )
+  const [banked, setBanked] = useState<BankedGame[]>(editSplit?.banked ?? [])
+  const [current, setCurrent] = useState<LiveGame>(editSplit?.current ?? [0, 0])
+  const [target, setTarget] = useState<number>(11)
   const [aId, setAId] = useState(initial?.playerAId ?? '')
   const [bId, setBId] = useState(initial?.playerBId ?? '')
   const submitting = useRef(false)
 
-  // Set "now" only on the client after mount to avoid SSR/client hydration mismatch
-  // on the datetime-local input. This is the canonical pattern for client-only init.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isEdit && playedAt === '') setPlayedAt(instantToWallClock(new Date()))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Called by the stopwatch — syncs both duration and durationText display.
-  // Stable reference so the stopwatch's interval effect doesn't restart every tick.
-  const handleStopwatchChange = useCallback((seconds: number) => {
-    setDuration(seconds)
-    setDurationText(seconds > 0 ? formatDuration(seconds) : '')
-  }, [])
+  const games = allGames(banked, current)
+  const t = tally(banked, current)
+  const winnerSide = matchWinner(banked, current)
+  const firstNameFor = (id: string) => (players.find((p) => p.id === id)?.name ?? 'Player').split(' ')[0]
 
-  function handleDurationText(text: string) {
-    // Strip to digits and read from the right as mm:ss — the numeric keypad
-    // has no colon on Android, so we insert it. Leading zeros dropped so the
-    // field can be cleared.
-    const digits = text.replace(/\D/g, '').replace(/^0+/, '').slice(0, 6)
-    if (digits === '') {
-      setDurationText('')
-      setDuration(0)
-      return
-    }
-    const n = parseInt(digits, 10)
-    const total = Math.floor(n / 100) * 60 + (n % 100)
-    setDuration(total)
-    setDurationText(formatDuration(total))
+  const resultSuffix = (() => {
+    if (games.length === 0) return ''
+    if (winnerSide === null) return `· ${t.a}–${t.b}, tied`
+    const who = winnerSide === 'A' ? firstNameFor(aId) : firstNameFor(bId)
+    return `· ${who} ${Math.max(t.a, t.b)}–${Math.min(t.a, t.b)}`
+  })()
+
+  function bankGame() {
+    if (!canBank(current) || !canAddGame(banked)) return
+    setBanked((b) => [...b, current as BankedGame])
+    setCurrent([0, 0])
   }
 
   async function handle(formData: FormData) {
@@ -99,9 +88,7 @@ export function MatchLogForm({
     setError(null)
     setPending(true)
     try {
-      const r = isEdit
-        ? await editMatch(initial!.id, formData)
-        : await logMatch(formData)
+      const r = isEdit ? await editMatch(initial!.id, formData) : await logMatch(formData)
       if (r && 'error' in r) {
         setError(r.error ?? null)
         return
@@ -109,14 +96,12 @@ export function MatchLogForm({
       if (onSuccess) onSuccess()
       if (!isEdit) {
         if (r && 'result' in r && (r as { result?: LogResult }).result) setResult((r as { result: LogResult }).result)
-        setSavedTick((t) => t + 1)
+        setSavedTick((s) => s + 1)
         setDuration(0)
-        setDurationText('')
-        setTimerRunning(false)
         setPlayedAt(instantToWallClock(new Date()))
-        setScores(Array.from({ length: 7 }, () => ['', '']))
-        setSetCount(1)
-        setMode('quick')
+        setBanked([])
+        setCurrent([0, 0])
+        setTarget(11)
         setAId('')
         setBId('')
       }
@@ -126,196 +111,81 @@ export function MatchLogForm({
     }
   }
 
-  // Derive live winner badge
-  const nameFor = (id: string) => players.find((p) => p.id === id)?.name ?? 'Player'
-  const activeSets: SetScore[] = scores
-    .slice(0, mode === 'quick' ? 1 : setCount)
-    .filter(([a, b]) => a !== '' && b !== '')
-    .map(([a, b]) => [Number(a), Number(b)] as SetScore)
-  const winnerSide = inferWinnerSide(activeSets)
-  const tally = setsWon(activeSets)
-  const badge = (() => {
-    if (activeSets.length === 0) return null
-    if (winnerSide === null) return { tone: 'tie' as const, text: 'Tied — adjust the score' }
-    const winnerName = winnerSide === 'A' ? nameFor(aId) : nameFor(bId)
-    if (mode === 'quick') {
-      const [a, b] = activeSets[0]
-      return { tone: 'win' as const, text: `${winnerName} wins · ${a}–${b}` }
-    }
-    return { tone: 'win' as const, text: `${winnerName} wins the match (${tally.a}–${tally.b})` }
-  })()
-
   if (!isEdit && result) {
     return (
       <RaceResult
         result={result}
         onLogAnother={() => {
           setResult(null)
-          setSavedTick((t) => t + 1)
+          setSavedTick((s) => s + 1)
         }}
       />
     )
   }
 
+  const canSave = !pending && !!aId && !!bId && games.length > 0
+  // Only nudge once both players are picked (missing players is self-evident from the disabled Save).
+  const saveHint = canSave || pending || !aId || !bId ? '' : 'Finish the current game — both scores, no tie.'
+
   return (
-    <form key={savedTick} action={handle} className="space-y-6">
+    <form key={savedTick} action={handle} className="space-y-4">
       <LoadingOverlay open={pending} label="Saving match…" />
+
+      <FlipPad
+        players={players}
+        aId={aId}
+        bId={bId}
+        onA={setAId}
+        onB={setBId}
+        current={current}
+        onCurrent={setCurrent}
+        tallyA={t.a}
+        tallyB={t.b}
+        target={target}
+        onTarget={setTarget}
+      />
+
+      <GamesStrip
+        banked={banked}
+        canBank={canBank(current)}
+        canAdd={canAddGame(banked)}
+        target={target}
+        onBank={bankGame}
+        onEditChip={(i, g) => setBanked((b) => b.map((x, idx) => (idx === i ? g : x)))}
+        onRemoveChip={(i) => setBanked((b) => b.filter((_, idx) => idx !== i))}
+      />
+
+      {/* Hidden fields carry the pad state into the existing server action. */}
+      {games.map((g, i) => (
+        <Fragment key={i}>
+          <input type="hidden" name={`set_${i}_a`} value={g[0]} readOnly />
+          <input type="hidden" name={`set_${i}_b`} value={g[1]} readOnly />
+        </Fragment>
+      ))}
+      <input type="hidden" name="playerAId" value={aId} readOnly />
+      <input type="hidden" name="playerBId" value={bId} readOnly />
       <input type="hidden" name="durationSeconds" value={duration || ''} readOnly />
 
-      {/* Mode toggle */}
-      <div className="flex gap-1 rounded-lg bg-secondary p-1">
-        {(['quick', 'full'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setMode(m)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
-            }`}
-          >
-            {m === 'quick' ? 'Quick' : 'Full match'}
-          </button>
-        ))}
+      <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+        <DurationPill value={duration} onChange={setDuration} />
+        <PlayedAtLine value={playedAt} onChange={setPlayedAt} />
       </div>
-
-      {/* Players */}
-      <div className="grid grid-cols-2 gap-4">
-        {(['A', 'B'] as const).map((side) => {
-          const fieldName = side === 'A' ? 'playerAId' : 'playerBId'
-          return (
-            <label key={side} className="block">
-              <span className="font-display uppercase tracking-widest text-xs text-muted-foreground">
-                Player {side}
-              </span>
-              <select
-                name={fieldName}
-                required
-                value={side === 'A' ? aId : bId}
-                onChange={(e) => side === 'A' ? setAId(e.target.value) : setBId(e.target.value)}
-                className="mt-1.5 w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">—</option>
-                {players.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.currentElo})
-                  </option>
-                ))}
-              </select>
-            </label>
-          )
-        })}
-      </div>
-
-      {/* Set scores */}
-      <fieldset className="space-y-2">
-        <legend className="section-header font-display w-full">
-          {mode === 'quick' ? 'Score' : 'Games'}
-        </legend>
-        {Array.from({ length: mode === 'quick' ? 1 : setCount }).map((_, i) => (
-          <div key={i} className="space-y-1.5">
-            {mode === 'full' && (
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-muted-foreground">Game {i + 1}</span>
-                {setCount > 1 && i === setCount - 1 && (
-                  <button
-                    type="button"
-                    aria-label={`remove game ${i + 1}`}
-                    onClick={() => setSetCount((c) => Math.max(1, c - 1))}
-                    className="shrink-0 px-1 text-muted-foreground hover:text-loss"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              <Stepper
-                name={`set_${i}_a`}
-                ariaLabel={`game ${i + 1} player A`}
-                defaultValue={scores[i][0] === '' ? '' : Number(scores[i][0])}
-                onValueChange={(v) =>
-                  setScores((s) => { const n = [...s]; n[i] = [v === '' ? '' : String(v), n[i][1]]; return n })
-                }
-              />
-              <span className="text-muted-foreground">–</span>
-              <Stepper
-                name={`set_${i}_b`}
-                ariaLabel={`game ${i + 1} player B`}
-                defaultValue={scores[i][1] === '' ? '' : Number(scores[i][1])}
-                onValueChange={(v) =>
-                  setScores((s) => { const n = [...s]; n[i] = [n[i][0], v === '' ? '' : String(v)]; return n })
-                }
-              />
-            </div>
-          </div>
-        ))}
-        {mode === 'full' && setCount < 7 && (
-          <button
-            type="button"
-            onClick={() => setSetCount((c) => Math.min(7, c + 1))}
-            className="rounded-md border border-dashed border-input px-3 py-1.5 text-sm text-primary"
-          >
-            ＋ Add game
-          </button>
-        )}
-      </fieldset>
-
-      {/* Live winner badge */}
-      {badge && (
-        <div className={`rounded-md border px-3 py-2 text-sm text-center ${
-          badge.tone === 'win'
-            ? 'border-primary bg-primary/10 text-primary'
-            : 'border-border text-muted-foreground'
-        }`}>
-          {badge.text}
-        </div>
-      )}
-
-      {/* Duration */}
-      <div className="space-y-2">
-        <div className="section-header font-display">Game duration</div>
-        <MatchStopwatch
-          value={duration}
-          onChange={handleStopwatchChange}
-          running={timerRunning}
-          onRunningChange={setTimerRunning}
-        />
-        <label className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground">Or enter manually (mm:ss)</span>
-          <input
-            value={durationText}
-            onChange={(e) => handleDurationText(e.target.value)}
-            onFocus={() => setTimerRunning(false)}
-            placeholder="12:30"
-            inputMode="numeric"
-            className="w-24 rounded-md border border-input bg-card px-2 py-1.5 font-mono nums text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </label>
-      </div>
-
-      {/* Date/time */}
-      <label className="block">
-        <span className="font-display uppercase tracking-widest text-xs text-muted-foreground">
-          Played at
-        </span>
-        <input
-          type="datetime-local"
-          name="playedAt"
-          value={playedAt}
-          onChange={(e) => setPlayedAt(e.target.value)}
-          className="mt-1.5 block rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-      </label>
 
       {error && <div className="text-sm text-loss">{error}</div>}
       {!isEdit && savedTick > 0 && !error && (
         <div className="text-sm text-gain">Match saved. Log another below.</div>
       )}
 
+      {saveHint && (
+        <div role="status" aria-live="polite" className="text-center text-xs text-muted-foreground">
+          {saveHint}
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={pending}
-        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        disabled={!canSave}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {pending && (
           <span
@@ -324,6 +194,7 @@ export function MatchLogForm({
           />
         )}
         {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Save match'}
+        {resultSuffix && <span className="font-normal opacity-85">{resultSuffix}</span>}
       </button>
     </form>
   )

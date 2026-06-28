@@ -2,9 +2,9 @@
 
 import { useRef, useState } from 'react'
 import { LoadingOverlay } from '@/components/loading-overlay'
-import { MatchStopwatch } from '@/components/match-stopwatch'
-import { Stepper } from '@/components/stepper'
-import { formatDuration } from '@/lib/stats'
+import { DurationPill } from '@/components/flip-pad/duration-pill'
+import { FlipCard } from '@/components/flip-pad/flip-card'
+import { canBank, gamePoint as calcGamePoint, type LiveGame } from '@/lib/flip-pad'
 import { logMatch } from '@/app/actions/matches'
 import { buildLogFields, type SessionState } from '@/lib/seeder-session'
 import type { Matchup, PlayerRef } from '@/lib/seeder'
@@ -104,9 +104,8 @@ function ActiveCard({
 }) {
   const current = active ?? firstPending
   const [duration, setDuration] = useState(0)
-  const [timerRunning, setTimerRunning] = useState(true)
-  const [a, setA] = useState<number | ''>('')
-  const [b, setB] = useState<number | ''>('')
+  const [a, setA] = useState<number | null>(0)
+  const [b, setB] = useState<number | null>(0)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const submitting = useRef(false)
@@ -120,10 +119,14 @@ function ActiveCard({
   }
 
   const isPlaying = current.status === 'playing'
+  const live: LiveGame = [a, b]
+  const leadA = a !== null && (b === null || a > b)
+  const leadB = b !== null && (a === null || b > a)
+  const gp = calcGamePoint(live, session.config.target)
 
   async function save() {
     if (submitting.current) return
-    if (a === '' || b === '') {
+    if (a === null || b === null) {
       setError('Enter both scores.')
       return
     }
@@ -131,7 +134,7 @@ function ActiveCard({
     setError(null)
     setPending(true)
     try {
-      const fields = buildLogFields(current!, [Number(a), Number(b)], duration, new Date().toISOString())
+      const fields = buildLogFields(current!, [a, b], duration, new Date().toISOString())
       const fd = new FormData()
       Object.entries(fields).forEach(([k, v]) => fd.set(k, v))
       const r = await logMatch(fd)
@@ -139,10 +142,10 @@ function ActiveCard({
         setError(r.error ?? 'Could not save.')
         return
       }
-      onFinish(current!.id, [Number(a), Number(b)], duration)
+      onFinish(current!.id, [a, b], duration)
       setDuration(0)
-      setA('')
-      setB('')
+      setA(0)
+      setB(0)
     } finally {
       setPending(false)
       submitting.current = false
@@ -150,7 +153,7 @@ function ActiveCard({
   }
 
   return (
-    <div className="rounded-lg border border-primary/40 bg-primary/5 p-4 space-y-4">
+    <div className="space-y-4 rounded-xl border border-border bg-card p-4">
       <LoadingOverlay open={pending} label="Saving game…" />
       <div className="text-center">
         <span className="font-display text-xl font-bold">{nameOf(session, current.aId)}</span>
@@ -168,26 +171,26 @@ function ActiveCard({
         </button>
       ) : (
         <div className="space-y-4">
-          <MatchStopwatch
-            value={duration}
-            onChange={setDuration}
-            running={timerRunning}
-            onRunningChange={setTimerRunning}
-          />
-          <div className="flex items-center justify-center gap-3">
-            <Stepper name="a" ariaLabel="player A score" defaultValue={a} onValueChange={setA} />
-            <span className="text-muted-foreground">–</span>
-            <Stepper name="b" ariaLabel="player B score" defaultValue={b} onValueChange={setB} />
+          <div className="flex items-end justify-center gap-5 rounded-[13px] bg-linear-to-b from-[#2a2d33] to-[#1b1d22] px-3 py-3 shadow-[0_5px_12px_rgba(0,0,0,0.22)]">
+            <FlipCard value={a} name={nameOf(session, current.aId)} lead={leadA} gamePoint={gp.a} onChange={setA} />
+            <div className="flex flex-col items-center gap-0.5 self-center text-[9px] uppercase tracking-wider text-[#9aa3b2]">
+              <span>To</span>
+              <span className="font-mono nums text-lg font-bold text-white">{session.config.target}</span>
+            </div>
+            <FlipCard value={b} name={nameOf(session, current.bId)} lead={leadB} gamePoint={gp.b} onChange={setB} />
           </div>
           {error && <div className="text-sm text-loss text-center">{error}</div>}
-          <button
-            type="button"
-            onClick={save}
-            disabled={pending}
-            className="w-full rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
-          >
-            {pending ? 'Saving…' : `Save ${formatDuration(duration)}`}
-          </button>
+          <div className="flex items-center justify-between gap-2">
+            <DurationPill value={duration} onChange={setDuration} autoStart />
+            <button
+              type="button"
+              onClick={save}
+              disabled={pending || !canBank(live)}
+              className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+            >
+              {pending ? 'Saving…' : 'Save'}
+            </button>
+          </div>
         </div>
       )}
     </div>
